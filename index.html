@@ -1,0 +1,435 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cosmere Connection Board</title>
+<style>
+:root{color-scheme:dark;--bg:#050505;--panel:#101010;--line:#f4f4f4;--muted:#a4a4a4;--border:#303030;--accent:#fff}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:#f5f5f5;font:14px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select{font:inherit;color:inherit;background:#101010;border:1px solid #424242;border-radius:8px;padding:9px 11px}
+button{cursor:pointer}
+button:hover{background:#222;border-color:#777}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid white;outline-offset:2px}
+.app{height:100%;display:grid;grid-template-rows:auto 1fr}
+.topbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--border);background:#080808;z-index:3}
+.brand{font-size:16px;font-weight:750;letter-spacing:.02em;margin-right:8px}
+.brand span{color:#aaa;font-weight:400}
+.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;flex:1}
+.tools input{min-width:180px;flex:1;max-width:310px}
+.tools select{max-width:240px}
+.status{color:#aaa;font-size:12px;white-space:nowrap}
+.workspace{min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 300px}
+.canvas-wrap{position:relative;overflow:hidden;min-width:0;background:#050505;touch-action:none}
+.canvas-wrap:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.12;background-image:radial-gradient(#777 0.7px,transparent .7px);background-size:22px 22px}
+#board{display:block;width:100%;height:100%;cursor:grab}
+#board.dragging{cursor:grabbing}
+.side{border-left:1px solid var(--border);background:#0a0a0a;padding:18px;overflow:auto}
+.side h2{font-size:14px;text-transform:uppercase;letter-spacing:.12em;margin:0 0 12px}
+.side p{color:#bdbdbd;margin:8px 0 14px}
+.legend{display:grid;gap:10px;margin:18px 0}
+.legend-row{display:flex;align-items:center;gap:9px;color:#ddd}
+.swatch{width:22px;height:2px;background:#fff;flex-shrink:0}
+.node-key{width:10px;height:10px;border:1px solid white;border-radius:50%;flex-shrink:0}
+.note{font-size:12px;color:#929292;border-top:1px solid #292929;padding-top:14px;margin-top:18px}
+.card{border:1px solid #333;border-radius:10px;padding:13px;margin-top:12px;background:#101010}
+.eyebrow{color:#aaa;text-transform:uppercase;letter-spacing:.1em;font-size:10px}
+.card h3{font-size:18px;margin:5px 0 8px}
+.pill{display:inline-block;border:1px solid #444;border-radius:99px;padding:3px 7px;font-size:11px;color:#ddd;margin:0 4px 5px 0}
+.related{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.related button{font-size:12px;padding:6px 8px}
+.empty{color:#aaa;font-size:13px}
+.footer-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+#tooltip{position:absolute;display:none;pointer-events:none;z-index:2;background:#f5f5f5;color:#080808;padding:7px 10px;border-radius:7px;font-weight:650;font-size:12px;max-width:220px}
+@media(max-width:760px){
+.workspace{grid-template-columns:1fr;grid-template-rows:minmax(320px,1fr) auto}
+.side{border-left:0;border-top:1px solid var(--border);max-height:38vh}
+.topbar{padding:10px}
+.brand{width:100%}
+.tools input{max-width:none;min-width:130px}
+.tools select{max-width:48%}
+.status{width:100%}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="topbar">
+  <div class="brand">COSMERE <span>/ connection board</span></div>
+  <div class="tools">
+    <input id="search" type="search" placeholder="Search characters, events, worlds…" aria-label="Search board">
+    <select id="seriesFilter" aria-label="Filter by series"><option value="all">All series</option></select>
+    <select id="cutoff" aria-label="Spoiler cutoff">
+      <option value="all">Spoilers: all published books</option>
+      <option value="elantris">Read through: Elantris</option>
+      <option value="mistborn1">Read through: The Final Empire</option>
+      <option value="mistborn3">Read through: The Hero of Ages</option>
+      <option value="warbreaker">Read through: Warbreaker</option>
+      <option value="stormlight1">Read through: The Way of Kings</option>
+      <option value="stormlight2">Read through: Words of Radiance</option>
+      <option value="stormlight3">Read through: Oathbringer</option>
+      <option value="stormlight4">Read through: Rhythm of War</option>
+      <option value="stormlight5">Read through: Wind and Truth</option>
+      <option value="secret">Read through: Secret Projects</option>
+    </select>
+    <button id="reset">Reset view</button>
+  </div>
+  <div class="status" id="status">Drag to pan · scroll to zoom · click a node</div>
+</header>
+<main class="workspace">
+  <section class="canvas-wrap" id="canvasWrap" aria-label="Interactive Cosmere connection board">
+    <svg id="board" role="img" aria-label="Interactive graph connecting Cosmere characters, events, and concepts" viewBox="0 0 1200 800">
+      <g id="world"></g>
+    </svg>
+    <div id="tooltip"></div>
+  </section>
+  <aside class="side" aria-live="polite">
+    <h2 id="detailHeading">The board</h2>
+    <p id="detailIntro">A connected map of people, events, places, and Cosmere lore. Select a pin to inspect its connections.</p>
+    <div id="detail"></div>
+    <div class="legend">
+      <div class="legend-row"><span class="node-key"></span> Character</div>
+      <div class="legend-row"><span class="node-key" style="border-radius:2px"></span> Event</div>
+      <div class="legend-row"><span class="node-key" style="transform:rotate(45deg);border-radius:0"></span> World / concept</div>
+      <div class="legend-row"><span class="swatch"></span> Known connection</div>
+    </div>
+    <div class="note">Prototype note: this is a starter graph, not a complete or authoritative Cosmere database. The spoiler selector is a foundation; book-by-book spoiler rules and sourced canon notes should be verified and expanded before public launch.</div>
+    <div class="footer-actions"><button id="showAll">Show all visible nodes</button><button id="downloadData">Export graph JSON</button></div>
+  </aside>
+</main>
+</div>
+<script>
+const books = {
+  elantris:1, mistborn1:2, mistborn3:3, warbreaker:4, stormlight1:5,
+  stormlight2:6, stormlight3:7, stormlight4:8, stormlight5:9, secret:10, all:99
+};
+
+const nodes = [
+ {id:"hoid",name:"Hoid",type:"character",series:"Multiple series",world:"Multiple worlds",book:"elantris",level:1,x:580,y:340,desc:"A recurring worldhopper who appears under different identities across the Cosmere. The details and significance of his appearances vary by book.",tags:["worldhopper","identity"],connections:["elantris-hoid","kelsier","shallan","kaladin","tress"]},
+ {id:"elantris-hoid",name:"Hoid in Elantris",type:"event",series:"Elantris",world:"Sel",book:"elantris",level:1,x:350,y:180,desc:"An early on-page appearance of Hoid. Later books add context to the importance of recurring visitors and aliases.",tags:["appearance"],connections:["hoid","sel"]},
+ {id:"sel",name:"Sel",type:"world",series:"Elantris",world:"Sel",book:"elantris",level:1,x:180,y:330,desc:"The world where Elantris takes place. Its magic systems are strongly associated with place and geography.",tags:["world","magic"],connections:["elantris-hoid","elantris"]},
+ {id:"elantris",name:"The Reod",type:"event",series:"Elantris",world:"Sel",book:"elantris",level:1,x:300,y:500,desc:"The catastrophe that transformed Elantris and its inhabitants, central to the novel's mystery.",tags:["history","magic"],connections:["sel"]},
+ {id:"kelsier",name:"Kelsier",type:"character",series:"Mistborn Era 1",world:"Scadrial",book:"mistborn1",level:2,x:800,y:170,desc:"A central figure in the original Mistborn trilogy. Later Cosmere material adds context beyond what the first trilogy reveals.",tags:["survivor","Scadrial"],connections:["hoid","final-empire","scadrial"]},
+ {id:"final-empire",name:"The Final Empire",type:"event",series:"Mistborn Era 1",world:"Scadrial",book:"mistborn1",level:2,x:1000,y:300,desc:"The rebellion against the Lord Ruler reshapes Scadrial and establishes consequences that carry through the trilogy.",tags:["rebellion","history"],connections:["kelsier","scadrial"]},
+ {id:"scadrial",name:"Scadrial",type:"world",series:"Mistborn",world:"Scadrial",book:"mistborn1",level:2,x:990,y:500,desc:"The world of Mistborn, where metallic arts play a major role in the planet's history and cultures.",tags:["world","magic"],connections:["kelsier","final-empire"]},
+ {id:"shallan",name:"Shallan Davar",type:"character",series:"Stormlight Archive",world:"Roshar",book:"stormlight1",level:5,x:600,y:540,desc:"A major Stormlight Archive viewpoint character whose personal history, artistic talents, and relationships with spren are important to the series.",tags:["Lightweaver","Roshar"],connections:["hoid","kaladin","roshar","knights-radiant"]},
+ {id:"kaladin",name:"Kaladin Stormblessed",type:"character",series:"Stormlight Archive",world:"Roshar",book:"stormlight1",level:5,x:790,y:650,desc:"A central Stormlight Archive character whose journey is tied to leadership, protection, and the return of the Knights Radiant.",tags:["Windrunner","Roshar"],connections:["hoid","shallan","roshar","knights-radiant"]},
+ {id:"roshar",name:"Roshar",type:"world",series:"Stormlight Archive",world:"Roshar",book:"stormlight1",level:5,x:400,y:680,desc:"The storm-swept world of the Stormlight Archive, with distinctive ecosystems, spren, and long-running conflicts.",tags:["world","spren"],connections:["shallan","kaladin","knights-radiant"]},
+ {id:"knights-radiant",name:"Knights Radiant",type:"world",series:"Stormlight Archive",world:"Roshar",book:"stormlight1",level:5,x:520,y:410,desc:"Orders of Surgebinders bonded to spren. Their oaths and history are central to the Stormlight Archive.",tags:["orders","magic"],connections:["shallan","kaladin","roshar"]},
+ {id:"tress",name:"Tress",type:"character",series:"Tress of the Emerald Sea",world:"Lumar",book:"secret",level:10,x:190,y:650,desc:"The protagonist of Tress of the Emerald Sea. The novel provides another perspective on the wider Cosmere.",tags:["protagonist","Lumar"],connections:["hoid"]},
+ {id:"warbreaker",name:"Warbreaker",type:"event",series:"Warbreaker",world:"Nalthis",book:"warbreaker",level:4,x:850,y:420,desc:"A standalone story on Nalthis featuring BioChromatic Breath and characters whose wider relevance is best explored with spoiler controls.",tags:["Nalthis","Breath"],connections:["hoid"]}
+];
+
+const links = [
+ ["hoid","elantris-hoid","appearance / identity"],
+ ["elantris-hoid","sel","located on"],
+ ["sel","elantris","history"],
+ ["hoid","kelsier","cross-series connection"],
+ ["kelsier","final-empire","involved in"],
+ ["final-empire","scadrial","takes place on"],
+ ["hoid","shallan","appearance / interaction"],
+ ["hoid","kaladin","appearance / interaction"],
+ ["shallan","kaladin","shared series"],
+ ["shallan","roshar","lives on"],
+ ["kaladin","roshar","lives on"],
+ ["roshar","knights-radiant","history / magic"],
+ ["shallan","knights-radiant","member of"],
+ ["kaladin","knights-radiant","member of"],
+ ["hoid","tress","narrative connection"],
+ ["hoid","warbreaker","appearance"]
+];
+
+const svg=document.getElementById("board");
+const world=document.getElementById("world");
+const NS="http://www.w3.org/2000/svg";
+let selected=null,scale=1,tx=0,ty=0,dragging=false,start=null,moved=false;
+
+function el(tag,attrs={}){
+ const e=document.createElementNS(NS,tag);
+ for(const [k,v] of Object.entries(attrs))e.setAttribute(k,v);
+ return e;
+}
+
+function allowed(n){
+ const c=document.getElementById("cutoff").value;
+ return c==="all"||books[n.book]<=books[c];
+}
+
+function visibleNodes(){
+ const q=document.getElementById("search").value.trim().toLowerCase();
+ const s=document.getElementById("seriesFilter").value;
+ return nodes.filter(n=>allowed(n)&&(s==="all"||n.series===s)&&
+ (!q||[n.name,n.type,n.series,n.world,n.desc,...n.tags].join(" ").toLowerCase().includes(q)));
+}
+
+function nodeShape(n){
+ if(n.type==="event")return el("rect",{x:-7,y:-7,width:14,height:14,rx:2});
+ if(n.type==="world")return el("polygon",{points:"0,-9 9,0 0,9 -9,0"});
+ return el("circle",{r:8});
+}
+
+function draw(){
+ world.replaceChildren();
+ const visible=visibleNodes();
+ const ids=new Set(visible.map(n=>n.id));
+ const edgeLayer=el("g"),nodeLayer=el("g");
+ world.append(edgeLayer,nodeLayer);
+
+ links.forEach(([a,b,label])=>{
+  if(!ids.has(a)||!ids.has(b))return;
+  const A=nodes.find(n=>n.id===a),B=nodes.find(n=>n.id===b);
+  const line=el("line",{
+   x1:A.x,y1:A.y,x2:B.x,y2:B.y,stroke:"#f5f5f5",
+   "stroke-width":1.3,
+   opacity:(selected&&(selected===a||selected===b))?".95":".38"
+  });
+  edgeLayer.append(line);
+
+  if(selected&&(selected===a||selected===b)){
+   const t=el("text",{
+    x:(A.x+B.x)/2,y:(A.y+B.y)/2-6,fill:"#aaa",
+    "font-size":10,"text-anchor":"middle",
+    "paint-order":"stroke","stroke":"#050505","stroke-width":3
+   });
+   t.textContent=label;
+   edgeLayer.append(t);
+  }
+ });
+
+ visible.forEach(n=>{
+  const g=el("g",{
+   transform:`translate(${n.x} ${n.y})`,
+   tabindex:"0",role:"button","aria-label":n.name,
+   style:"cursor:pointer"
+  });
+  const shape=nodeShape(n);
+  shape.setAttribute("fill",selected===n.id?"#fff":"#050505");
+  shape.setAttribute("stroke","#fff");
+  shape.setAttribute("stroke-width",selected===n.id?2.5:1.5);
+  g.append(shape);
+
+  if(selected===n.id){
+   g.append(el("circle",{
+    r:15,fill:"none",stroke:"#fff","stroke-width":1,opacity:".8"
+   }));
+  }
+
+  const label=el("text",{
+   x:0,y:24,fill:"#f4f4f4","font-size":13,
+   "font-weight":selected===n.id?700:500,
+   "text-anchor":"middle","paint-order":"stroke",
+   "stroke":"#050505","stroke-width":4,"stroke-linejoin":"round"
+  });
+  label.textContent=n.name;
+  g.append(label);
+
+  g.addEventListener("click",e=>{
+   e.stopPropagation();
+   if(!moved)selectNode(n.id);
+  });
+  g.addEventListener("keydown",e=>{
+   if(e.key==="Enter"||e.key===" "){
+    e.preventDefault();selectNode(n.id);
+   }
+  });
+  g.addEventListener("pointerenter",()=>showTooltip(n));
+  g.addEventListener("pointerleave",hideTooltip);
+  nodeLayer.append(g);
+ });
+
+ document.getElementById("status").textContent=
+  `${visible.length} visible pins · drag to pan · scroll to zoom · click a node`;
+
+ if(selected&&!ids.has(selected)){
+  selected=null;renderDetail(null);
+ }
+}
+
+function selectNode(id){
+ selected=id;
+ draw();
+ renderDetail(nodes.find(n=>n.id===id));
+}
+
+function renderDetail(n){
+ const h=document.getElementById("detailHeading");
+ const intro=document.getElementById("detailIntro");
+ const d=document.getElementById("detail");
+ d.replaceChildren();
+
+ if(!n){
+  h.textContent="The board";
+  intro.textContent="A connected map of people, events, places, and Cosmere lore. Select a pin to inspect its connections.";
+  return;
+ }
+
+ h.textContent=n.name;
+ intro.textContent="Selected pin";
+
+ const card=document.createElement("div");
+ card.className="card";
+
+ const eye=document.createElement("div");
+ eye.className="eyebrow";
+ eye.textContent=n.type+" · "+n.series;
+ card.append(eye);
+
+ const title=document.createElement("h3");
+ title.textContent=n.name;
+ card.append(title);
+
+ const desc=document.createElement("p");
+ desc.textContent=n.desc;
+ card.append(desc);
+
+ [n.world,...n.tags].filter(Boolean).forEach(t=>{
+  const p=document.createElement("span");
+  p.className="pill";
+  p.textContent=t;
+  card.append(p);
+ });
+
+ const bookNames={
+  elantris:"Elantris",
+  mistborn1:"The Final Empire",
+  mistborn3:"The Hero of Ages",
+  warbreaker:"Warbreaker",
+  stormlight1:"The Way of Kings",
+  stormlight2:"Words of Radiance",
+  stormlight3:"Oathbringer",
+  stormlight4:"Rhythm of War",
+  stormlight5:"Wind and Truth",
+  secret:"Secret Projects"
+ };
+ const book=document.createElement("p");
+ book.textContent="Spoiler level: "+(bookNames[n.book]||"Elantris");
+ card.append(book);
+ d.append(card);
+
+ const rel=document.createElement("div");
+ rel.className="related";
+ const label=document.createElement("p");
+ label.textContent="Connected pins";
+ label.style.color="#aaa";
+ d.append(label);
+
+ const relatedIds=new Set(
+  links.filter(l=>l[0]===n.id||l[1]===n.id)
+   .flatMap(l=>[l[0],l[1]]).filter(x=>x!==n.id)
+ );
+
+ [...relatedIds].forEach(id=>{
+  const target=nodes.find(x=>x.id===id);
+  if(!target||!allowed(target))return;
+  const b=document.createElement("button");
+  b.textContent=target.name;
+  b.onclick=()=>selectNode(id);
+  rel.append(b);
+ });
+
+ if(!rel.children.length){
+  const p=document.createElement("span");
+  p.className="empty";
+  p.textContent="No visible connected pins at this spoiler cutoff.";
+  rel.append(p);
+ }
+ d.append(rel);
+}
+
+function showTooltip(n){
+ const t=document.getElementById("tooltip");
+ t.textContent=n.name+" · "+n.type;
+ t.style.display="block";
+ t.style.left="16px";
+ t.style.top="16px";
+}
+
+function hideTooltip(){
+ document.getElementById("tooltip").style.display="none";
+}
+
+function applyTransform(){
+ world.setAttribute("transform",`translate(${tx} ${ty}) scale(${scale})`);
+}
+
+function reset(){
+ scale=1;tx=0;ty=0;
+ applyTransform();
+ selected=null;
+ renderDetail(null);
+ draw();
+}
+
+svg.addEventListener("pointerdown",e=>{
+ if(e.target.closest("g[role=button]"))return;
+ dragging=true;moved=false;
+ start={x:e.clientX,y:e.clientY,tx,ty};
+ svg.classList.add("dragging");
+ svg.setPointerCapture(e.pointerId);
+});
+
+svg.addEventListener("pointermove",e=>{
+ if(!dragging)return;
+ const dx=e.clientX-start.x,dy=e.clientY-start.y;
+ if(Math.abs(dx)+Math.abs(dy)>3)moved=true;
+ tx=start.tx+dx;ty=start.ty+dy;
+ applyTransform();
+});
+
+svg.addEventListener("pointerup",()=>{
+ dragging=false;
+ svg.classList.remove("dragging");
+});
+
+svg.addEventListener("pointercancel",()=>{
+ dragging=false;
+ svg.classList.remove("dragging");
+});
+
+svg.addEventListener("wheel",e=>{
+ e.preventDefault();
+ const factor=e.deltaY<0?1.08:.92;
+ scale=Math.max(.45,Math.min(2.8,scale*factor));
+ applyTransform();
+},{passive:false});
+
+document.getElementById("search").addEventListener("input",draw);
+document.getElementById("seriesFilter").addEventListener("change",draw);
+document.getElementById("cutoff").addEventListener("change",()=>{
+ draw();
+ if(selected)renderDetail(nodes.find(n=>n.id===selected));
+});
+document.getElementById("reset").onclick=reset;
+
+document.getElementById("showAll").onclick=()=>{
+ document.getElementById("search").value="";
+ document.getElementById("seriesFilter").value="all";
+ draw();
+};
+
+document.getElementById("downloadData").onclick=()=>{
+ const data={
+  nodes,links,
+  notice:"Starter dataset only; verify and expand canon and spoiler metadata before public release."
+ };
+ const a=document.createElement("a");
+ a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));
+ a.download="cosmere-connection-data.json";
+ a.click();
+ URL.revokeObjectURL(a.href);
+};
+
+const sf=document.getElementById("seriesFilter");
+[...new Set(nodes.map(n=>n.series))].sort().forEach(s=>{
+ const o=document.createElement("option");
+ o.value=s;o.textContent=s;
+ sf.append(o);
+});
+
+draw();
+applyTransform();
+</script>
+</body>
+</html>
