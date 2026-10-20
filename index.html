@@ -5,22 +5,28 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cosmere Connection Board</title>
+
 <style>
 :root {
   color-scheme: dark;
   --bg: #050505;
   --panel: #101010;
+  --line: #f5f5f5;
   --muted: #a4a4a4;
   --border: #303030;
 }
+
 * { box-sizing: border-box; }
+
 html, body {
   margin: 0;
   height: 100%;
   background: var(--bg);
   color: #f5f5f5;
-  font: 14px/1.45 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font: 14px/1.45 system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
 }
+
 button, input, select {
   font: inherit;
   color: inherit;
@@ -29,13 +35,23 @@ button, input, select {
   border-radius: 8px;
   padding: 9px 11px;
 }
+
 button { cursor: pointer; }
 button:hover { background: #222; border-color: #777; }
-button:focus-visible, input:focus-visible, select:focus-visible {
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
   outline: 2px solid white;
   outline-offset: 2px;
 }
-.app { height: 100%; display: grid; grid-template-rows: auto 1fr; }
+
+.app {
+  min-height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
 .topbar {
   display: flex;
   align-items: center;
@@ -46,21 +62,68 @@ button:focus-visible, input:focus-visible, select:focus-visible {
   background: #080808;
   z-index: 3;
 }
-.brand { font-size: 16px; font-weight: 750; letter-spacing: .02em; margin-right: 8px; }
-.brand span { color: #aaa; font-weight: 400; }
-.tools { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; flex: 1; }
-.tools input { min-width: 180px; flex: 1; max-width: 310px; }
+
+.brand {
+  font-size: 16px;
+  font-weight: 750;
+  letter-spacing: .02em;
+  margin-right: 8px;
+}
+
+.brand span {
+  color: #aaa;
+  font-weight: 400;
+}
+
+.tools {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  flex: 1;
+}
+
+.tools input {
+  min-width: 160px;
+  flex: 1;
+  max-width: 310px;
+}
+
 .tools select { max-width: 230px; }
-.status { color: #aaa; font-size: 12px; white-space: nowrap; }
-.workspace { min-height: 0; display: grid; grid-template-columns: minmax(0,1fr) 310px; }
+
+.zoom-controls {
+  display: flex;
+  gap: 5px;
+}
+
+.zoom-controls button {
+  min-width: 38px;
+  font-size: 18px;
+  padding: 6px 10px;
+}
+
+.status {
+  color: #aaa;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.workspace {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+}
+
 .canvas-wrap {
   position: relative;
   overflow: hidden;
   min-width: 0;
+  min-height: 420px;
   background: #050505;
   touch-action: none;
 }
-.canvas-wrap:before {
+
+.canvas-wrap::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -69,24 +132,126 @@ button:focus-visible, input:focus-visible, select:focus-visible {
   background-image: radial-gradient(#777 .7px, transparent .7px);
   background-size: 22px 22px;
 }
-#board { display: block; width: 100%; height: 100%; cursor: grab; }
+
+#board {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 420px;
+  cursor: grab;
+}
+
 #board.dragging { cursor: grabbing; }
-.side { border-left: 1px solid var(--border); background: #0a0a0a; padding: 18px; overflow: auto; }
-.side h2 { font-size: 14px; text-transform: uppercase; letter-spacing: .12em; margin: 0 0 12px; }
-.side p { color: #bdbdbd; margin: 8px 0 14px; }
-.legend { display: grid; gap: 10px; margin: 18px 0; }
-.legend-row { display: flex; align-items: center; gap: 9px; color: #ddd; }
-.swatch { width: 22px; height: 2px; background: #fff; flex-shrink: 0; }
-.node-key { width: 10px; height: 10px; border: 1px solid white; border-radius: 50%; flex-shrink: 0; }
-.note { font-size: 12px; color: #929292; border-top: 1px solid #292929; padding-top: 14px; margin-top: 18px; }
-.card { border: 1px solid #333; border-radius: 10px; padding: 13px; margin-top: 12px; background: #101010; }
-.eyebrow { color: #aaa; text-transform: uppercase; letter-spacing: .1em; font-size: 10px; }
-.card h3 { font-size: 18px; margin: 5px 0 8px; }
-.pill { display: inline-block; border: 1px solid #444; border-radius: 99px; padding: 3px 7px; font-size: 11px; color: #ddd; margin: 0 4px 5px 0; }
-.related { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-.related button { font-size: 12px; padding: 6px 8px; }
-.empty { color: #aaa; font-size: 13px; }
-.footer-actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+
+.side {
+  border-left: 1px solid var(--border);
+  background: #0a0a0a;
+  padding: 18px;
+  overflow: auto;
+}
+
+.side h2 {
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  margin: 0 0 12px;
+}
+
+.side p {
+  color: #bdbdbd;
+  margin: 8px 0 14px;
+}
+
+.legend {
+  display: grid;
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #ddd;
+}
+
+.swatch {
+  width: 22px;
+  height: 2px;
+  background: white;
+  flex-shrink: 0;
+}
+
+.node-key {
+  width: 10px;
+  height: 10px;
+  border: 1px solid white;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.note {
+  font-size: 12px;
+  color: #929292;
+  border-top: 1px solid #292929;
+  padding-top: 14px;
+  margin-top: 18px;
+}
+
+.card {
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 13px;
+  margin-top: 12px;
+  background: #101010;
+}
+
+.eyebrow {
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  font-size: 10px;
+}
+
+.card h3 {
+  font-size: 18px;
+  margin: 5px 0 8px;
+}
+
+.pill {
+  display: inline-block;
+  border: 1px solid #444;
+  border-radius: 99px;
+  padding: 3px 7px;
+  font-size: 11px;
+  color: #ddd;
+  margin: 0 4px 5px 0;
+}
+
+.related {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.related button {
+  font-size: 12px;
+  padding: 6px 8px;
+}
+
+.empty {
+  color: #aaa;
+  font-size: 13px;
+}
+
+.footer-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
 #tooltip {
   position: absolute;
   display: none;
@@ -100,39 +265,52 @@ button:focus-visible, input:focus-visible, select:focus-visible {
   font-size: 12px;
   max-width: 240px;
 }
-#tooltip small { display: block; font-weight: 400; margin-top: 2px; }
-@media(max-width:900px) {
-  .workspace { grid-template-columns: minmax(0,1fr) 280px; }
-  .tools input { max-width: 220px; }
-  .tools select { max-width: 190px; }
-}
-@media(max-width:760px) {
-  .workspace { grid-template-columns: 1fr; grid-template-rows: minmax(320px,1fr) auto; }
-  .side { border-left: 0; border-top: 1px solid var(--border); max-height: 38vh; }
+
+@media (max-width: 760px) {
+  .workspace {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(360px, 1fr) auto;
+  }
+
+  .side {
+    border-left: 0;
+    border-top: 1px solid var(--border);
+    max-height: 42vh;
+  }
+
   .topbar { padding: 10px; }
   .brand { width: 100%; }
   .tools input { max-width: none; min-width: 130px; }
-  .tools select { max-width: 48%; flex: 1; }
-  .status { width: 100%; white-space: normal; }
+  .tools select { max-width: 48%; }
+  .status { width: 100%; }
 }
 </style>
 </head>
+
 <body>
 <div class="app">
+
 <header class="topbar">
   <div class="brand">COSMERE <span>/ connection board</span></div>
+
   <div class="tools">
-    <input id="search" type="search" placeholder="Search people, events, worlds…" aria-label="Search board">
+    <input
+      id="search"
+      type="search"
+      placeholder="Search characters, events, worlds…"
+      aria-label="Search board"
+    >
 
     <select id="seriesFilter" aria-label="Filter by series">
       <option value="all">All series</option>
     </select>
 
-    <select id="typeFilter" aria-label="Filter by pin type">
-      <option value="all">All pin types</option>
-      <option value="character">People</option>
-      <option value="event">Events</option>
-      <option value="world">Worlds / concepts</option>
+    <select id="typeFilter" aria-label="Filter by node type">
+      <option value="all">All types</option>
+      <option value="world">Worlds</option>
+      <option value="character">Characters</option>
+      <option value="event">Events / stories</option>
+      <option value="concept">Concepts / groups</option>
     </select>
 
     <select id="cutoff" aria-label="Spoiler cutoff">
@@ -149,14 +327,32 @@ button:focus-visible, input:focus-visible, select:focus-visible {
       <option value="secret">Read through: Secret Projects</option>
     </select>
 
+    <div class="zoom-controls" aria-label="Zoom controls">
+      <button id="zoomOut" aria-label="Zoom out" title="Zoom out">−</button>
+      <button id="zoomIn" aria-label="Zoom in" title="Zoom in">+</button>
+    </div>
+
+    <button id="fitBoard">Fit board</button>
     <button id="reset">Reset view</button>
   </div>
-  <div class="status" id="status">Drag to pan · scroll to zoom · select a pin</div>
+
+  <div class="status" id="status">
+    Drag to pan · scroll to zoom · click a node
+  </div>
 </header>
 
 <main class="workspace">
-  <section class="canvas-wrap" id="canvasWrap" aria-label="Interactive Cosmere connection board">
-    <svg id="board" role="img" aria-label="Interactive graph connecting Cosmere characters, events, and concepts" viewBox="0 0 1200 800">
+  <section
+    class="canvas-wrap"
+    id="canvasWrap"
+    aria-label="Interactive Cosmere connection board"
+  >
+    <svg
+      id="board"
+      role="img"
+      aria-label="Interactive graph connecting Cosmere characters, events, worlds, and concepts"
+      viewBox="0 0 1200 800"
+    >
       <g id="world"></g>
     </svg>
     <div id="tooltip"></div>
@@ -164,21 +360,47 @@ button:focus-visible, input:focus-visible, select:focus-visible {
 
   <aside class="side" aria-live="polite">
     <h2 id="detailHeading">The board</h2>
-    <p id="detailIntro">People, events, places, and lore share one board. Search to spotlight a topic, or select a pin to inspect its connections.</p>
+    <p id="detailIntro">
+      A connected map of people, events, places, and Cosmere lore.
+      Select a pin to inspect its connections.
+    </p>
+
     <div id="detail"></div>
 
     <div class="legend">
-      <div class="legend-row"><span class="node-key"></span> Character / person</div>
-      <div class="legend-row"><span class="node-key" style="border-radius:2px"></span> Event</div>
-      <div class="legend-row"><span class="node-key" style="transform:rotate(45deg);border-radius:0"></span> World / concept</div>
-      <div class="legend-row"><span class="swatch"></span> Known connection</div>
+      <div class="legend-row">
+        <span class="node-key"></span> Character
+      </div>
+      <div class="legend-row">
+        <span class="node-key" style="border-radius:2px"></span> Event / story
+      </div>
+      <div class="legend-row">
+        <span class="node-key" style="transform:rotate(45deg);border-radius:0"></span>
+        World
+      </div>
+      <div class="legend-row">
+        <span class="node-key" style="border-radius:0;transform:rotate(45deg)"></span>
+        Concept / group
+      </div>
+      <div class="legend-row">
+        <span class="swatch"></span> Known connection
+      </div>
     </div>
 
-    <div class="note">Starter dataset only. Verify canon notes and spoiler levels before treating this as a complete Cosmere reference. Search highlights matches and their direct connections without removing the rest of the board.</div>
+    <div class="note">
+      Worlds sit along the top, with related stories, events, and characters
+      below them. Cross-world connections are shown separately rather than
+      forcing every node into a strict hierarchy.
+
+      <br><br>
+
+      This is a starter graph, not a complete or authoritative Cosmere
+      database. Spoiler levels are approximate and should be verified and
+      expanded before relying on the board as a spoiler-safe reference.
+    </div>
 
     <div class="footer-actions">
       <button id="showAll">Clear filters</button>
-      <button id="fit">Fit board</button>
       <button id="downloadData">Export graph JSON</button>
     </div>
   </aside>
@@ -187,197 +409,462 @@ button:focus-visible, input:focus-visible, select:focus-visible {
 
 <script>
 const books = {
-  elantris:1, mistborn1:2, mistborn3:3, warbreaker:4,
-  stormlight1:5, stormlight2:6, stormlight3:7,
-  stormlight4:8, stormlight5:9, secret:10, all:99
+  elantris: 1,
+  mistborn1: 2,
+  mistborn3: 3,
+  warbreaker: 4,
+  stormlight1: 5,
+  stormlight2: 6,
+  stormlight3: 7,
+  stormlight4: 8,
+  stormlight5: 9,
+  secret: 10,
+  all: 99
 };
 
-/* Starter data: expand and verify as you add Cosmere connections. */
+/*
+  Layout guide:
+  - Worlds: top row
+  - Stories/events: middle row
+  - Characters and groups: lower rows
+  - Hoid remains centrally placed to show cross-series connections
+
+  Coordinates use the SVG viewBox: 1200 x 800.
+*/
+
 const nodes = [
- {id:"hoid",name:"Hoid",type:"character",series:"Multiple series",world:"Multiple worlds",book:"elantris",level:1,x:580,y:340,desc:"A recurring worldhopper who appears under different identities across the Cosmere. The details and significance of his appearances vary by book.",tags:["worldhopper","identity"]},
- {id:"elantris-hoid",name:"Hoid in Elantris",type:"event",series:"Elantris",world:"Sel",book:"elantris",level:1,x:350,y:180,desc:"An early on-page appearance of Hoid. Later books add context to the importance of recurring visitors and aliases.",tags:["appearance"]},
- {id:"sel",name:"Sel",type:"world",series:"Elantris",world:"Sel",book:"elantris",level:1,x:180,y:330,desc:"The world where Elantris takes place. Its magic systems are strongly associated with place and geography.",tags:["world","magic"]},
- {id:"elantris",name:"The Reod",type:"event",series:"Elantris",world:"Sel",book:"elantris",level:1,x:300,y:500,desc:"The catastrophe that transformed Elantris and its inhabitants, central to the novel's mystery.",tags:["history","magic"]},
- {id:"kelsier",name:"Kelsier",type:"character",series:"Mistborn Era 1",world:"Scadrial",book:"mistborn1",level:2,x:800,y:170,desc:"A central figure in the original Mistborn trilogy. Later Cosmere material adds context beyond what the first trilogy reveals.",tags:["survivor","Scadrial"]},
- {id:"final-empire",name:"The Final Empire rebellion",type:"event",series:"Mistborn Era 1",world:"Scadrial",book:"mistborn1",level:2,x:1000,y:300,desc:"The rebellion against the Lord Ruler reshapes Scadrial and establishes consequences that carry through the trilogy.",tags:["rebellion","history"]},
- {id:"scadrial",name:"Scadrial",type:"world",series:"Mistborn",world:"Scadrial",book:"mistborn1",level:2,x:990,y:500,desc:"The world of Mistborn, where metallic arts play a major role in the planet's history and cultures.",tags:["world","magic"]},
- {id:"shallan",name:"Shallan Davar",type:"character",series:"Stormlight Archive",world:"Roshar",book:"stormlight1",level:5,x:600,y:540,desc:"A major Stormlight Archive viewpoint character whose personal history, artistic talents, and relationships with spren are important to the series.",tags:["Lightweaver","Roshar"]},
- {id:"kaladin",name:"Kaladin Stormblessed",type:"character",series:"Stormlight Archive",world:"Roshar",book:"stormlight1",level:5,x:790,y:650,desc:"A central Stormlight Archive character whose journey is tied to leadership, protection, and the return of the Knights Radiant.",tags:["Windrunner","Roshar"]},
- {id:"roshar",name:"Roshar",type:"world",series:"Stormlight Archive",world:"Roshar",book:"stormlight1",level:5,x:400,y:680,desc:"The storm-swept world of the Stormlight Archive, with distinctive ecosystems, spren, and long-running conflicts.",tags:["world","spren"]},
- {id:"knights-radiant",name:"Knights Radiant",type:"world",series:"Stormlight Archive",world:"Roshar",book:"stormlight1",level:5,x:520,y:410,desc:"Orders of Surgebinders bonded to spren. Their oaths and history are central to the Stormlight Archive.",tags:["orders","magic"]},
- {id:"tress",name:"Tress",type:"character",series:"Tress of the Emerald Sea",world:"Lumar",book:"secret",level:10,x:190,y:650,desc:"The protagonist of Tress of the Emerald Sea. The novel provides another perspective on the wider Cosmere.",tags:["protagonist","Lumar"]},
- {id:"warbreaker",name:"Warbreaker",type:"event",series:"Warbreaker",world:"Nalthis",book:"warbreaker",level:4,x:850,y:420,desc:"A standalone story on Nalthis featuring BioChromatic Breath and characters whose wider relevance is best explored with spoiler controls.",tags:["Nalthis","Breath"]}
+  {
+    id: "sel",
+    name: "Sel",
+    type: "world",
+    series: "Elantris",
+    world: "Sel",
+    book: "elantris",
+    level: 1,
+    x: 180,
+    y: 120,
+    desc: "The world where Elantris takes place. Its magic systems are strongly associated with place and geography.",
+    tags: ["world", "magic"]
+  },
+  {
+    id: "scadrial",
+    name: "Scadrial",
+    type: "world",
+    series: "Mistborn",
+    world: "Scadrial",
+    book: "mistborn1",
+    level: 2,
+    x: 430,
+    y: 120,
+    desc: "The world of Mistborn, where metallic arts play a major role in the planet's history and cultures.",
+    tags: ["world", "magic"]
+  },
+  {
+    id: "roshar",
+    name: "Roshar",
+    type: "world",
+    series: "Stormlight Archive",
+    world: "Roshar",
+    book: "stormlight1",
+    level: 5,
+    x: 700,
+    y: 120,
+    desc: "The storm-swept world of the Stormlight Archive, with distinctive ecosystems, spren, and long-running conflicts.",
+    tags: ["world", "spren"]
+  },
+  {
+    id: "nalthis",
+    name: "Nalthis",
+    type: "world",
+    series: "Warbreaker",
+    world: "Nalthis",
+    book: "warbreaker",
+    level: 4,
+    x: 950,
+    y: 120,
+    desc: "The world where Warbreaker takes place, associated with BioChromatic Breath.",
+    tags: ["world", "Breath"]
+  },
+  {
+    id: "lumar",
+    name: "Lumar",
+    type: "world",
+    series: "Tress of the Emerald Sea",
+    world: "Lumar",
+    book: "secret",
+    level: 10,
+    x: 1080,
+    y: 120,
+    desc: "The world where Tress of the Emerald Sea takes place.",
+    tags: ["world", "spores"]
+  },
+
+  {
+    id: "elantris-hoid",
+    name: "Hoid in Elantris",
+    type: "event",
+    series: "Elantris",
+    world: "Sel",
+    book: "elantris",
+    level: 1,
+    x: 150,
+    y: 330,
+    desc: "An early on-page appearance of Hoid. Later books add context to the importance of recurring visitors and aliases.",
+    tags: ["appearance", "Hoid"]
+  },
+  {
+    id: "elantris",
+    name: "The Reod",
+    type: "event",
+    series: "Elantris",
+    world: "Sel",
+    book: "elantris",
+    level: 1,
+    x: 180,
+    y: 430,
+    desc: "The catastrophe that transformed Elantris and its inhabitants, central to the novel's mystery.",
+    tags: ["history", "magic"]
+  },
+  {
+    id: "final-empire",
+    name: "The Final Empire",
+    type: "event",
+    series: "Mistborn Era 1",
+    world: "Scadrial",
+    book: "mistborn1",
+    level: 2,
+    x: 430,
+    y: 330,
+    desc: "The rebellion against the Lord Ruler reshapes Scadrial and establishes consequences that carry through the trilogy.",
+    tags: ["rebellion", "history"]
+  },
+  {
+    id: "knights-radiant",
+    name: "Knights Radiant",
+    type: "concept",
+    series: "Stormlight Archive",
+    world: "Roshar",
+    book: "stormlight1",
+    level: 5,
+    x: 700,
+    y: 330,
+    desc: "Orders of Surgebinders bonded to spren. Their oaths and history are central to the Stormlight Archive.",
+    tags: ["orders", "magic", "spren"]
+  },
+  {
+    id: "warbreaker",
+    name: "Warbreaker",
+    type: "event",
+    series: "Warbreaker",
+    world: "Nalthis",
+    book: "warbreaker",
+    level: 4,
+    x: 950,
+    y: 330,
+    desc: "A standalone story on Nalthis featuring BioChromatic Breath and characters whose wider relevance is best explored with spoiler controls.",
+    tags: ["Nalthis", "Breath"]
+  },
+
+  {
+    id: "hoid",
+    name: "Hoid",
+    type: "character",
+    series: "Multiple series",
+    world: "Multiple worlds",
+    book: "elantris",
+    level: 1,
+    x: 600,
+    y: 550,
+    desc: "A recurring worldhopper who appears under different identities across the Cosmere. The details and significance of his appearances vary by book.",
+    tags: ["worldhopper", "identity"]
+  },
+  {
+    id: "kelsier",
+    name: "Kelsier",
+    type: "character",
+    series: "Mistborn Era 1",
+    world: "Scadrial",
+    book: "mistborn1",
+    level: 2,
+    x: 430,
+    y: 550,
+    desc: "A central figure in the original Mistborn trilogy. Later Cosmere material adds context beyond what the first trilogy reveals.",
+    tags: ["survivor", "Scadrial"]
+  },
+  {
+    id: "shallan",
+    name: "Shallan Davar",
+    type: "character",
+    series: "Stormlight Archive",
+    world: "Roshar",
+    book: "stormlight1",
+    level: 5,
+    x: 700,
+    y: 550,
+    desc: "A major Stormlight Archive viewpoint character whose personal history, artistic talents, and relationships with spren are important to the series.",
+    tags: ["Lightweaver", "Roshar"]
+  },
+  {
+    id: "kaladin",
+    name: "Kaladin Stormblessed",
+    type: "character",
+    series: "Stormlight Archive",
+    world: "Roshar",
+    book: "stormlight1",
+    level: 5,
+    x: 820,
+    y: 660,
+    desc: "A central Stormlight Archive character whose journey is tied to leadership, protection, and the return of the Knights Radiant.",
+    tags: ["Windrunner", "Roshar"]
+  },
+  {
+    id: "tress",
+    name: "Tress",
+    type: "character",
+    series: "Tress of the Emerald Sea",
+    world: "Lumar",
+    book: "secret",
+    level: 10,
+    x: 1080,
+    y: 550,
+    desc: "The protagonist of Tress of the Emerald Sea. The novel provides another perspective on the wider Cosmere.",
+    tags: ["protagonist", "Lumar"]
+  }
 ];
 
+/*
+  Connections are stored separately from the nodes.
+  Each link is: [node ID A, node ID B, connection description].
+*/
+
 const links = [
- ["hoid","elantris-hoid","appearance / identity"],
- ["elantris-hoid","sel","located on"],
- ["sel","elantris","history"],
- ["hoid","kelsier","cross-series connection"],
- ["kelsier","final-empire","involved in"],
- ["final-empire","scadrial","takes place on"],
- ["hoid","shallan","appearance / interaction"],
- ["hoid","kaladin","appearance / interaction"],
- ["shallan","kaladin","shared series"],
- ["shallan","roshar","lives on"],
- ["kaladin","roshar","lives on"],
- ["roshar","knights-radiant","history / magic"],
- ["shallan","knights-radiant","member of"],
- ["kaladin","knights-radiant","member of"],
- ["hoid","tress","narrative connection"],
- ["hoid","warbreaker","appearance"]
+  ["hoid", "elantris-hoid", "appearance / identity"],
+  ["elantris-hoid", "sel", "located on"],
+  ["sel", "elantris", "history"],
+  ["hoid", "kelsier", "cross-series connection"],
+  ["kelsier", "final-empire", "involved in"],
+  ["final-empire", "scadrial", "takes place on"],
+  ["hoid", "shallan", "appearance / interaction"],
+  ["hoid", "kaladin", "appearance / interaction"],
+  ["shallan", "kaladin", "shared series"],
+  ["shallan", "roshar", "lives on"],
+  ["kaladin", "roshar", "lives on"],
+  ["roshar", "knights-radiant", "history / magic"],
+  ["shallan", "knights-radiant", "member of"],
+  ["kaladin", "knights-radiant", "member of"],
+  ["hoid", "tress", "narrative connection"],
+  ["hoid", "warbreaker", "appearance"],
+  ["nalthis", "warbreaker", "story takes place on"],
+  ["lumar", "tress", "story takes place on"]
 ];
 
 const svg = document.getElementById("board");
 const world = document.getElementById("world");
+const wrap = document.getElementById("canvasWrap");
 const NS = "http://www.w3.org/2000/svg";
 
 let selected = null;
-let scale = 1, tx = 0, ty = 0;
-let dragging = false, start = null, moved = false;
-let searchMatches = new Set();
+let scale = 1;
+let tx = 0;
+let ty = 0;
+let dragging = false;
+let start = null;
+let moved = false;
 
 function el(tag, attrs = {}) {
-  const e = document.createElementNS(NS, tag);
-  for (const [k,v] of Object.entries(attrs)) e.setAttribute(k,v);
-  return e;
+  const element = document.createElementNS(NS, tag);
+
+  for (const [key, value] of Object.entries(attrs)) {
+    element.setAttribute(key, value);
+  }
+
+  return element;
 }
 
-function allowed(n) {
+function allowed(node) {
   const cutoff = document.getElementById("cutoff").value;
-  return cutoff === "all" || books[n.book] <= books[cutoff];
+
+  if (cutoff === "all") return true;
+
+  return (books[node.book] ?? 99) <= (books[cutoff] ?? 99);
 }
 
-function filterNodes() {
+function visibleNodes() {
+  const query = document.getElementById("search").value.trim().toLowerCase();
   const series = document.getElementById("seriesFilter").value;
   const type = document.getElementById("typeFilter").value;
-  return nodes.filter(n =>
-    allowed(n) &&
-    (series === "all" || n.series === series) &&
-    (type === "all" || n.type === type)
-  );
-}
 
-function updateSearchMatches(visible) {
-  const query = document.getElementById("search").value.trim().toLowerCase();
-  searchMatches = new Set();
-  if (!query) return;
+  return nodes.filter(node => {
+    if (!allowed(node)) return false;
+    if (series !== "all" && node.series !== series) return false;
+    if (type !== "all" && node.type !== type) return false;
 
-  const matches = visible.filter(n =>
-    [n.name,n.type,n.series,n.world,n.desc,...n.tags]
-      .join(" ").toLowerCase().includes(query)
-  );
+    if (query) {
+      const searchable = [
+        node.name,
+        node.type,
+        node.series,
+        node.world,
+        node.desc,
+        ...(node.tags || [])
+      ].join(" ").toLowerCase();
 
-  matches.forEach(n => searchMatches.add(n.id));
+      if (!searchable.includes(query)) return false;
+    }
 
-  // Spotlight direct neighbors but leave the wider graph visible.
-  matches.forEach(n => {
-    links.forEach(([a,b]) => {
-      if (a === n.id) searchMatches.add(b);
-      if (b === n.id) searchMatches.add(a);
-    });
+    return true;
   });
 }
 
-function nodeShape(n) {
-  if (n.type === "event")
-    return el("rect",{x:-7,y:-7,width:14,height:14,rx:2});
-  if (n.type === "world")
-    return el("polygon",{points:"0,-9 9,0 0,9 -9,0"});
-  return el("circle",{r:8});
+function nodeShape(node) {
+  if (node.type === "event") {
+    return el("rect", {
+      x: -7,
+      y: -7,
+      width: 14,
+      height: 14,
+      rx: 2
+    });
+  }
+
+  if (node.type === "world") {
+    return el("polygon", {
+      points: "0,-10 10,0 0,10 -10,0"
+    });
+  }
+
+  if (node.type === "concept") {
+    return el("polygon", {
+      points: "-9,-6 0,-11 9,-6 9,6 0,11 -9,6"
+    });
+  }
+
+  return el("circle", { r: 8 });
 }
 
 function draw() {
   world.replaceChildren();
-  const visible = filterNodes();
-  const ids = new Set(visible.map(n => n.id));
-  updateSearchMatches(visible);
+
+  const visible = visibleNodes();
+  const visibleIds = new Set(visible.map(node => node.id));
 
   const edgeLayer = el("g");
   const nodeLayer = el("g");
-  world.append(edgeLayer,nodeLayer);
 
-  links.forEach(([a,b,label]) => {
-    if (!ids.has(a) || !ids.has(b)) return;
-    const A = nodes.find(n => n.id === a);
-    const B = nodes.find(n => n.id === b);
-    const isSelected = selected && (selected === a || selected === b);
-    const focused = !searchMatches.size ||
-      (searchMatches.has(a) && searchMatches.has(b)) || isSelected;
+  world.append(edgeLayer, nodeLayer);
 
-    edgeLayer.append(el("line",{
-      x1:A.x,y1:A.y,x2:B.x,y2:B.y,
-      stroke:"#f5f5f5",
-      "stroke-width":isSelected ? 2 : 1.3,
-      opacity:focused ? ".48" : ".09"
-    }));
+  // Draw connections first so they sit behind the nodes.
+  links.forEach(([a, b, label]) => {
+    if (!visibleIds.has(a) || !visibleIds.has(b)) return;
 
-    if (isSelected) {
-      const text = el("text",{
-        x:(A.x+B.x)/2,y:(A.y+B.y)/2-6,
-        fill:"#c5c5c5","font-size":10,
-        "text-anchor":"middle","paint-order":"stroke",
-        stroke:"#050505","stroke-width":3
+    const nodeA = nodes.find(node => node.id === a);
+    const nodeB = nodes.find(node => node.id === b);
+
+    if (!nodeA || !nodeB) return;
+
+    const isSelectedEdge =
+      selected && (selected === a || selected === b);
+
+    const line = el("line", {
+      x1: nodeA.x,
+      y1: nodeA.y,
+      x2: nodeB.x,
+      y2: nodeB.y,
+      stroke: "#f5f5f5",
+      "stroke-width": isSelectedEdge ? 1.8 : 1.2,
+      opacity: isSelectedEdge ? ".95" : ".38"
+    });
+
+    edgeLayer.append(line);
+
+    if (isSelectedEdge) {
+      const middleX = (nodeA.x + nodeB.x) / 2;
+      const middleY = (nodeA.y + nodeB.y) / 2;
+
+      const text = el("text", {
+        x: middleX,
+        y: middleY - 7,
+        fill: "#bbb",
+        "font-size": 10,
+        "text-anchor": "middle",
+        "paint-order": "stroke",
+        stroke: "#050505",
+        "stroke-width": 3
       });
+
       text.textContent = label;
       edgeLayer.append(text);
     }
   });
 
-  visible.forEach(n => {
-    const isSelected = selected === n.id;
-    const isMatch = searchMatches.has(n.id);
-    const g = el("g",{
-      transform:`translate(${n.x} ${n.y})`,
-      tabindex:"0",role:"button","aria-label":n.name,
-      style:"cursor:pointer",
-      opacity:searchMatches.size && !isMatch ? ".28" : "1"
+  // Draw nodes and their labels.
+  visible.forEach(node => {
+    const isSelected = selected === node.id;
+
+    const group = el("g", {
+      transform: `translate(${node.x} ${node.y})`,
+      tabindex: "0",
+      role: "button",
+      "aria-label": node.name,
+      style: "cursor:pointer"
     });
 
-    const shape = nodeShape(n);
-    shape.setAttribute("fill",isSelected ? "#fff" : "#050505");
-    shape.setAttribute("stroke",isMatch ? "#fff" : "#aaa");
-    shape.setAttribute("stroke-width",isSelected ? 2.7 : isMatch ? 2 : 1.4);
-    g.append(shape);
+    const shape = nodeShape(node);
 
-    if (isSelected || isMatch) {
-      g.append(el("circle",{
-        r:isSelected ? 16 : 12,
-        fill:"none",stroke:"#fff",
-        "stroke-width":isSelected ? 1.5 : 1,
-        opacity:isSelected ? ".9" : ".55"
+    shape.setAttribute("fill", isSelected ? "#fff" : "#050505");
+    shape.setAttribute("stroke", "#fff");
+    shape.setAttribute("stroke-width", isSelected ? "2.5" : "1.5");
+
+    group.append(shape);
+
+    if (isSelected) {
+      group.append(el("circle", {
+        r: 16,
+        fill: "none",
+        stroke: "#fff",
+        "stroke-width": 1,
+        opacity: ".8"
       }));
     }
 
-    const label = el("text",{
-      x:0,y:24,fill:"#f4f4f4",
-      "font-size":13,
-      "font-weight":isSelected || isMatch ? 700 : 500,
-      "text-anchor":"middle","paint-order":"stroke",
-      stroke:"#050505","stroke-width":4,"stroke-linejoin":"round"
+    const label = el("text", {
+      x: 0,
+      y: 25,
+      fill: "#f4f4f4",
+      "font-size": 13,
+      "font-weight": isSelected ? 700 : 500,
+      "text-anchor": "middle",
+      "paint-order": "stroke",
+      stroke: "#050505",
+      "stroke-width": 4,
+      "stroke-linejoin": "round"
     });
-    label.textContent = n.name;
-    g.append(label);
 
-    g.addEventListener("click",e => {
-      e.stopPropagation();
-      if (!moved) selectNode(n.id);
+    label.textContent = node.name;
+    group.append(label);
+
+    group.addEventListener("click", event => {
+      event.stopPropagation();
+      if (!moved) selectNode(node.id);
     });
-    g.addEventListener("keydown",e => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        selectNode(n.id);
+
+    group.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        selectNode(node.id);
       }
     });
-    g.addEventListener("pointerenter",() => showTooltip(n));
-    g.addEventListener("pointerleave",hideTooltip);
-    nodeLayer.append(g);
+
+    group.addEventListener("pointerenter", () => showTooltip(node));
+    group.addEventListener("pointerleave", hideTooltip);
+
+    nodeLayer.append(group);
   });
 
   document.getElementById("status").textContent =
-    `${visible.length} visible pins · drag to pan · scroll to zoom · select a pin`;
+    `${visible.length} visible pins · drag to pan · scroll or +/- to zoom`;
 
-  if (selected && !ids.has(selected)) {
+  if (selected && !visibleIds.has(selected)) {
     selected = null;
     renderDetail(null);
   }
@@ -386,22 +873,26 @@ function draw() {
 function selectNode(id) {
   selected = id;
   draw();
-  renderDetail(nodes.find(n => n.id === id));
+
+  const node = nodes.find(item => item.id === id);
+  renderDetail(node || null);
 }
 
-function renderDetail(n) {
+function renderDetail(node) {
   const heading = document.getElementById("detailHeading");
   const intro = document.getElementById("detailIntro");
   const detail = document.getElementById("detail");
+
   detail.replaceChildren();
 
-  if (!n) {
+  if (!node) {
     heading.textContent = "The board";
-    intro.textContent = "People, events, places, and lore share one board. Search to spotlight a topic, or select a pin to inspect its connections.";
+    intro.textContent =
+      "A connected map of people, events, places, and Cosmere lore. Select a pin to inspect its connections.";
     return;
   }
 
-  heading.textContent = n.name;
+  heading.textContent = node.name;
   intro.textContent = "Selected pin";
 
   const card = document.createElement("div");
@@ -409,62 +900,68 @@ function renderDetail(n) {
 
   const eyebrow = document.createElement("div");
   eyebrow.className = "eyebrow";
-  eyebrow.textContent = n.type + " · " + n.series;
+  eyebrow.textContent = `${node.type} · ${node.series}`;
   card.append(eyebrow);
 
   const title = document.createElement("h3");
-  title.textContent = n.name;
+  title.textContent = node.name;
   card.append(title);
 
-  const desc = document.createElement("p");
-  desc.textContent = n.desc;
-  card.append(desc);
+  const description = document.createElement("p");
+  description.textContent = node.desc;
+  card.append(description);
 
-  [n.world,...n.tags].filter(Boolean).forEach(tag => {
-    const pill = document.createElement("span");
-    pill.className = "pill";
-    pill.textContent = tag;
-    card.append(pill);
-  });
+  [node.world, ...(node.tags || [])]
+    .filter(Boolean)
+    .forEach(tag => {
+      const pill = document.createElement("span");
+      pill.className = "pill";
+      pill.textContent = tag;
+      card.append(pill);
+    });
 
   const bookNames = {
-    elantris:"Elantris",
-    mistborn1:"The Final Empire",
-    mistborn3:"The Hero of Ages",
-    warbreaker:"Warbreaker",
-    stormlight1:"The Way of Kings",
-    stormlight2:"Words of Radiance",
-    stormlight3:"Oathbringer",
-    stormlight4:"Rhythm of War",
-    stormlight5:"Wind and Truth",
-    secret:"Secret Projects"
+    elantris: "Elantris",
+    mistborn1: "The Final Empire",
+    mistborn3: "The Hero of Ages",
+    warbreaker: "Warbreaker",
+    stormlight1: "The Way of Kings",
+    stormlight2: "Words of Radiance",
+    stormlight3: "Oathbringer",
+    stormlight4: "Rhythm of War",
+    stormlight5: "Wind and Truth",
+    secret: "Secret Projects"
   };
-  const book = document.createElement("p");
-  book.textContent = "Spoiler level: " + (bookNames[n.book] || n.book);
-  card.append(book);
+
+  const spoiler = document.createElement("p");
+  spoiler.textContent =
+    `Spoiler level: ${bookNames[node.book] || "Unspecified"}`;
+  card.append(spoiler);
+
   detail.append(card);
 
-  const connectedLabel = document.createElement("p");
-  connectedLabel.textContent = "Connected pins";
-  connectedLabel.style.color = "#aaa";
-  detail.append(connectedLabel);
+  const relatedHeading = document.createElement("p");
+  relatedHeading.textContent = "Connected pins";
+  relatedHeading.style.color = "#aaa";
+  detail.append(relatedHeading);
 
   const related = document.createElement("div");
   related.className = "related";
 
-  const relatedIds = [...new Set(
+  const relatedIds = new Set(
     links
-      .filter(link => link[0] === n.id || link[1] === n.id)
-      .map(link => link[0] === n.id ? link[1] : link[0])
-  )];
+      .filter(link => link[0] === node.id || link[1] === node.id)
+      .map(link => link[0] === node.id ? link[1] : link[0])
+  );
 
-  relatedIds.forEach(id => {
-    const target = nodes.find(x => x.id === id);
+  [...relatedIds].forEach(id => {
+    const target = nodes.find(item => item.id === id);
+
     if (!target || !allowed(target)) return;
 
     const button = document.createElement("button");
     button.textContent = target.name;
-    button.onclick = () => selectNode(id);
+    button.addEventListener("click", () => selectNode(id));
     related.append(button);
   });
 
@@ -474,21 +971,13 @@ function renderDetail(n) {
     empty.textContent = "No visible connected pins at this spoiler cutoff.";
     related.append(empty);
   }
+
   detail.append(related);
 }
 
-function showTooltip(n) {
+function showTooltip(node) {
   const tooltip = document.getElementById("tooltip");
-  tooltip.replaceChildren();
-
-  const name = document.createElement("span");
-  name.textContent = n.name;
-  tooltip.append(name);
-
-  const small = document.createElement("small");
-  small.textContent = n.type + " · " + n.series;
-  tooltip.append(small);
-
+  tooltip.textContent = `${node.name} · ${node.type}`;
   tooltip.style.display = "block";
   tooltip.style.left = "16px";
   tooltip.style.top = "16px";
@@ -499,133 +988,190 @@ function hideTooltip() {
 }
 
 function applyTransform() {
-  world.setAttribute("transform",`translate(${tx} ${ty}) scale(${scale})`);
+  world.setAttribute(
+    "transform",
+    `translate(${tx} ${ty}) scale(${scale})`
+  );
+}
+
+/*
+  Zoom toward the center of the SVG.
+  The scale limits prevent the graph from becoming too small or too large.
+*/
+function zoomBy(factor) {
+  const oldScale = scale;
+  const newScale = Math.max(0.35, Math.min(3, oldScale * factor));
+
+  const centerX = 600;
+  const centerY = 400;
+  const ratio = newScale / oldScale;
+
+  tx = centerX - (centerX - tx) * ratio;
+  ty = centerY - (centerY - ty) * ratio;
+  scale = newScale;
+
+  applyTransform();
 }
 
 function fitBoard() {
-  const visible = filterNodes();
-  if (!visible.length) return;
+  const bounds = world.getBBox();
 
-  const xs = visible.map(n => n.x);
-  const ys = visible.map(n => n.y);
-  const minX = Math.min(...xs)-90;
-  const maxX = Math.max(...xs)+90;
-  const minY = Math.min(...ys)-70;
-  const maxY = Math.max(...ys)+80;
-  const viewBox = svg.viewBox.baseVal;
+  if (!bounds.width || !bounds.height) return;
+
+  const padding = 70;
+  const availableWidth = 1200 - padding * 2;
+  const availableHeight = 800 - padding * 2;
 
   scale = Math.min(
-    (viewBox.width-50)/(maxX-minX),
-    (viewBox.height-50)/(maxY-minY),
-    1.15
+    availableWidth / bounds.width,
+    availableHeight / bounds.height,
+    1
   );
-  tx = (viewBox.width-(minX+maxX)*scale)/2;
-  ty = (viewBox.height-(minY+maxY)*scale)/2;
+
+  scale = Math.max(0.35, Math.min(3, scale));
+
+  tx = 600 - (bounds.x + bounds.width / 2) * scale;
+  ty = 400 - (bounds.y + bounds.height / 2) * scale;
+
   applyTransform();
 }
 
 function reset() {
-  scale=1; tx=0; ty=0; selected=null;
-  document.getElementById("search").value="";
-  document.getElementById("seriesFilter").value="all";
-  document.getElementById("typeFilter").value="all";
-  document.getElementById("cutoff").value="all";
+  scale = 1;
+  tx = 0;
+  ty = 0;
+  selected = null;
+
   applyTransform();
   renderDetail(null);
   draw();
-  fitBoard();
 }
 
-svg.addEventListener("pointerdown",e => {
-  if (e.target.closest('g[role="button"]')) return;
-  dragging=true;
-  moved=false;
-  start={x:e.clientX,y:e.clientY,tx,ty};
+/* Zoom button controls */
+document.getElementById("zoomIn").addEventListener("click", () => {
+  zoomBy(1.2);
+});
+
+document.getElementById("zoomOut").addEventListener("click", () => {
+  zoomBy(1 / 1.2);
+});
+
+/* Pan with pointer dragging */
+svg.addEventListener("pointerdown", event => {
+  if (event.target.closest('g[role="button"]')) return;
+
+  dragging = true;
+  moved = false;
+
+  start = {
+    x: event.clientX,
+    y: event.clientY,
+    tx,
+    ty
+  };
+
   svg.classList.add("dragging");
-  svg.setPointerCapture(e.pointerId);
+  svg.setPointerCapture(event.pointerId);
 });
 
-svg.addEventListener("pointermove",e => {
-  if (!dragging) return;
-  const dx=e.clientX-start.x;
-  const dy=e.clientY-start.y;
-  if (Math.abs(dx)+Math.abs(dy)>3) moved=true;
-  tx=start.tx+dx;
-  ty=start.ty+dy;
+svg.addEventListener("pointermove", event => {
+  if (!dragging || !start) return;
+
+  const rect = svg.getBoundingClientRect();
+  const viewBox = svg.viewBox.baseVal;
+
+  const dx = (event.clientX - start.x) * viewBox.width / rect.width;
+  const dy = (event.clientY - start.y) * viewBox.height / rect.height;
+
+  if (Math.abs(dx) + Math.abs(dy) > 3) moved = true;
+
+  tx = start.tx + dx;
+  ty = start.ty + dy;
+
   applyTransform();
 });
 
-svg.addEventListener("pointerup",() => {
-  dragging=false;
+function stopDragging() {
+  dragging = false;
   svg.classList.remove("dragging");
-});
-svg.addEventListener("pointercancel",() => {
-  dragging=false;
-  svg.classList.remove("dragging");
-});
+}
 
-svg.addEventListener("wheel",e => {
-  e.preventDefault();
-  const factor=e.deltaY<0 ? 1.08 : .92;
-  scale=Math.max(.35,Math.min(3,scale*factor));
-  applyTransform();
-},{passive:false});
+svg.addEventListener("pointerup", stopDragging);
+svg.addEventListener("pointercancel", stopDragging);
 
-document.getElementById("search").addEventListener("input",draw);
+/* Mouse wheel zoom */
+svg.addEventListener("wheel", event => {
+  event.preventDefault();
+  zoomBy(event.deltaY < 0 ? 1.1 : 1 / 1.1);
+}, { passive: false });
 
-document.getElementById("seriesFilter").addEventListener("change",() => {
+/* Search and filters */
+document.getElementById("search").addEventListener("input", draw);
+
+document.getElementById("seriesFilter").addEventListener("change", draw);
+document.getElementById("typeFilter").addEventListener("change", draw);
+
+document.getElementById("cutoff").addEventListener("change", () => {
   draw();
-  fitBoard();
+
+  if (selected) {
+    renderDetail(nodes.find(node => node.id === selected) || null);
+  }
 });
 
-document.getElementById("typeFilter").addEventListener("change",() => {
+/* Board buttons */
+document.getElementById("reset").addEventListener("click", reset);
+document.getElementById("fitBoard").addEventListener("click", fitBoard);
+
+document.getElementById("showAll").addEventListener("click", () => {
+  document.getElementById("search").value = "";
+  document.getElementById("seriesFilter").value = "all";
+  document.getElementById("typeFilter").value = "all";
+  document.getElementById("cutoff").value = "all";
+
+  selected = null;
+  renderDetail(null);
   draw();
-  fitBoard();
 });
 
-document.getElementById("cutoff").addEventListener("change",() => {
-  draw();
-  if (selected) renderDetail(nodes.find(n => n.id === selected));
-  fitBoard();
-});
-
-document.getElementById("reset").onclick=reset;
-
-document.getElementById("showAll").onclick=() => {
-  document.getElementById("search").value="";
-  document.getElementById("seriesFilter").value="all";
-  document.getElementById("typeFilter").value="all";
-  draw();
-  fitBoard();
-};
-
-document.getElementById("fit").onclick=fitBoard;
-
-document.getElementById("downloadData").onclick=() => {
-  const data={
+/* Export the current node and connection data as JSON */
+document.getElementById("downloadData").addEventListener("click", () => {
+  const data = {
     nodes,
     links,
-    notice:"Starter dataset only; verify and expand canon and spoiler metadata before public release."
+    notice: "Starter dataset only. Verify and expand canon and spoiler metadata before public release."
   };
-  const blob = new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href=url;
-  a.download="cosmere-connection-data.json";
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(url),1000);
-};
 
-const seriesFilter=document.getElementById("seriesFilter");
-[...new Set(nodes.map(n => n.series))].sort().forEach(series => {
-  const option=document.createElement("option");
-  option.value=series;
-  option.textContent=series;
-  seriesFilter.append(option);
+  const blob = new Blob(
+    [JSON.stringify(data, null, 2)],
+    { type: "application/json" }
+  );
+
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+
+  anchor.href = url;
+  anchor.download = "cosmere-connection-data.json";
+  anchor.click();
+
+  URL.revokeObjectURL(url);
 });
 
+/* Populate the series filter from the node dataset */
+const seriesFilter = document.getElementById("seriesFilter");
+
+[...new Set(nodes.map(node => node.series))]
+  .sort()
+  .forEach(series => {
+    const option = document.createElement("option");
+    option.value = series;
+    option.textContent = series;
+    seriesFilter.append(option);
+  });
+
+/* Initial render */
 draw();
-fitBoard();
+applyTransform();
 </script>
 </body>
 </html>
