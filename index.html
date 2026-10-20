@@ -28,13 +28,9 @@
       --white-line: #525252;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
-    html {
-      scroll-behavior: smooth;
-    }
+    html { scroll-behavior: smooth; }
 
     body {
       margin: 0;
@@ -44,19 +40,19 @@
       font-size: 14px;
     }
 
-    button, input, select {
-      font: inherit;
-    }
-
-    button {
-      cursor: pointer;
-    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
 
     button:focus-visible,
     input:focus-visible,
     select:focus-visible {
       outline: 2px solid var(--red-hover);
       outline-offset: 2px;
+    }
+
+    button:disabled {
+      opacity: .38;
+      cursor: not-allowed;
     }
 
     .topbar {
@@ -105,10 +101,7 @@
       letter-spacing: -.7px;
     }
 
-    .subtitle {
-      color: var(--muted);
-      font-size: 11px;
-    }
+    .subtitle { color: var(--muted); font-size: 11px; }
 
     .spoiler {
       color: #ffbfc7;
@@ -128,9 +121,7 @@
       padding: 25px 28px 35px;
     }
 
-    .intro {
-      margin-bottom: 21px;
-    }
+    .intro { margin-bottom: 21px; }
 
     .eyebrow {
       color: #ef6979;
@@ -192,14 +183,10 @@
       padding: 0 13px 0 36px;
     }
 
-    .search-wrap input::placeholder {
-      color: var(--subtle);
-    }
+    .search-wrap input::placeholder { color: var(--subtle); }
 
     .search-wrap input:focus,
-    .filter-select:focus {
-      border-color: var(--red);
-    }
+    .filter-select:focus { border-color: var(--red); }
 
     .filter-select {
       min-width: 155px;
@@ -224,7 +211,7 @@
       transition: background .15s, border-color .15s;
     }
 
-    .btn:hover {
+    .btn:hover:not(:disabled) {
       background: var(--panel3);
       border-color: #666;
     }
@@ -235,9 +222,7 @@
       color: white;
     }
 
-    .btn.primary:hover {
-      background: var(--red-hover);
-    }
+    .btn.primary:hover:not(:disabled) { background: var(--red-hover); }
 
     .btn.active {
       border-color: var(--red);
@@ -323,12 +308,47 @@
       white-space: nowrap;
     }
 
+    .network-wrap {
+      position: relative;
+      width: 100%;
+    }
+
     #network {
       height: 600px;
       width: 100%;
       background-color: #0c0c0c;
       background-image: radial-gradient(#272727 .8px, transparent .8px);
       background-size: 22px 22px;
+    }
+
+    /* This small X follows the selected node on the graph. */
+    .clear-selection-button {
+      position: absolute;
+      z-index: 5;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 25px;
+      height: 25px;
+      padding: 0;
+      border: 1px solid #ff9aa6;
+      border-radius: 50%;
+      background: #c52a3d;
+      color: white;
+      font-size: 17px;
+      line-height: 1;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, .65);
+      transition: background .12s, transform .12s;
+    }
+
+    .clear-selection-button:hover {
+      background: #e0394e;
+      transform: scale(1.08);
+    }
+
+    .clear-selection-button:focus-visible {
+      outline: 2px solid white;
+      outline-offset: 2px;
     }
 
     .graph-controls {
@@ -367,13 +387,8 @@
       border-radius: 50%;
     }
 
-    .details-panel {
-      min-height: 600px;
-    }
-
-    .details-content {
-      padding: 19px;
-    }
+    .details-panel { min-height: 600px; }
+    .details-content { padding: 19px; }
 
     .empty-state {
       min-height: 470px;
@@ -398,10 +413,7 @@
       margin-bottom: 16px;
     }
 
-    .empty-state h3 {
-      font-size: 14px;
-      margin: 0 0 8px;
-    }
+    .empty-state h3 { font-size: 14px; margin: 0 0 8px; }
 
     .empty-state p {
       font-size: 11px;
@@ -464,20 +476,9 @@
       color: #e4e4e4;
     }
 
-    .book-tag.f {
-      border-color: #68303a;
-      color: #ffbfc7;
-    }
-
-    .book-tag.w {
-      border-color: #3c5273;
-      color: #b7ceff;
-    }
-
-    .book-tag.h {
-      border-color: #38614b;
-      color: #b5e6c7;
-    }
+    .book-tag.f { border-color: #68303a; color: #ffbfc7; }
+    .book-tag.w { border-color: #3c5273; color: #b7ceff; }
+    .book-tag.h { border-color: #38614b; color: #b5e6c7; }
 
     .character-description {
       margin: 15px 0;
@@ -517,10 +518,7 @@
       border-color: #71303a;
     }
 
-    .connection-name {
-      font-size: 11px;
-      font-weight: 700;
-    }
+    .connection-name { font-size: 11px; font-weight: 700; }
 
     .connection-type {
       display: block;
@@ -536,9 +534,7 @@
       flex-shrink: 0;
     }
 
-    .directory-panel {
-      margin-top: 14px;
-    }
+    .directory-panel { margin-top: 14px; }
 
     .directory-toolbar {
       display: flex;
@@ -548,13 +544,8 @@
       gap: 10px;
     }
 
-    .directory-toolbar .panel-caption {
-      margin-top: 4px;
-    }
-
-    .directory-list {
-      padding: 4px 17px;
-    }
+    .directory-toolbar .panel-caption { margin-top: 4px; }
+    .directory-list { padding: 4px 17px; }
 
     .directory-row {
       width: 100%;
@@ -570,13 +561,8 @@
       text-align: left;
     }
 
-    .directory-row:last-child {
-      border-bottom: 0;
-    }
-
-    .directory-row:hover .directory-name {
-      color: #ff8795;
-    }
+    .directory-row:last-child { border-bottom: 0; }
+    .directory-row:hover .directory-name { color: #ff8795; }
 
     .directory-main {
       display: flex;
@@ -593,13 +579,8 @@
       background: var(--white-line);
     }
 
-    .directory-dot.main {
-      background: var(--red);
-    }
-
-    .directory-dot.historical {
-      background: #9978b6;
-    }
+    .directory-dot.main { background: var(--red); }
+    .directory-dot.historical { background: #9978b6; }
 
     .directory-name {
       font-size: 11px;
@@ -645,104 +626,36 @@
       line-height: 1.9;
     }
 
-    footer a {
-      color: #f06b7c;
-      text-decoration: none;
-    }
-
-    footer a:hover {
-      text-decoration: underline;
-    }
+    footer a { color: #f06b7c; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
 
     @media (max-width: 1000px) {
-      .workspace {
-        grid-template-columns: minmax(0, 1fr) 280px;
-      }
-
-      #network {
-        height: 540px;
-      }
-
-      .details-panel {
-        min-height: 540px;
-      }
+      .workspace { grid-template-columns: minmax(0, 1fr) 280px; }
+      #network { height: 540px; }
+      .details-panel { min-height: 540px; }
     }
 
     @media (max-width: 760px) {
-      .topbar-inner {
-        padding: 14px;
-      }
-
-      .page {
-        padding: 21px 13px 28px;
-      }
-
-      .workspace {
-        grid-template-columns: minmax(0, 1fr);
-      }
-
-      #network {
-        height: 470px;
-      }
-
-      .details-panel {
-        min-height: 0;
-      }
-
-      .empty-state {
-        min-height: 210px;
-      }
-
-      .spoiler {
-        font-size: 8px;
-        padding: 7px;
-      }
-
-      h1 {
-        font-size: 17px;
-      }
-
-      .intro h2 {
-        font-size: 21px;
-      }
-
-      footer {
-        padding: 0 13px 22px;
-      }
+      .topbar-inner { padding: 14px; }
+      .page { padding: 21px 13px 28px; }
+      .workspace { grid-template-columns: minmax(0, 1fr); }
+      #network { height: 470px; }
+      .details-panel { min-height: 0; }
+      .empty-state { min-height: 210px; }
+      .spoiler { font-size: 8px; padding: 7px; }
+      h1 { font-size: 17px; }
+      .intro h2 { font-size: 21px; }
+      footer { padding: 0 13px 22px; }
     }
 
     @media (max-width: 480px) {
-      .brand-mark {
-        width: 37px;
-        height: 37px;
-        font-size: 19px;
-      }
-
-      .subtitle {
-        max-width: 190px;
-        line-height: 1.5;
-      }
-
-      .toolbar {
-        gap: 7px;
-      }
-
-      .filter-select {
-        flex: 1 1 135px;
-        min-width: 0;
-      }
-
-      .toolbar > .btn {
-        flex: 1 1 90px;
-      }
-
-      #network {
-        height: 420px;
-      }
-
-      .intro p {
-        font-size: 11px;
-      }
+      .brand-mark { width: 37px; height: 37px; font-size: 19px; }
+      .subtitle { max-width: 190px; line-height: 1.5; }
+      .toolbar { gap: 7px; }
+      .filter-select { flex: 1 1 135px; min-width: 0; }
+      .toolbar > .btn { flex: 1 1 90px; }
+      #network { height: 420px; }
+      .intro p { font-size: 11px; }
     }
   </style>
 </head>
@@ -810,7 +723,7 @@
         <span>connections visible</span>
       </div>
       <div class="stat">
-        <span id="currentMode">Focused view</span>
+        <span id="currentMode">Full network</span>
       </div>
     </section>
 
@@ -821,15 +734,24 @@
             <h3>Relationship map</h3>
             <div class="panel-caption">Click a character to explore their network</div>
           </div>
-          <span class="view-indicator" id="viewIndicator">FOCUSED</span>
+          <span class="view-indicator" id="viewIndicator">FULL MAP</span>
         </div>
 
-        <div id="network" aria-label="Interactive Mistborn character graph"></div>
+        <div class="network-wrap" id="networkWrap">
+          <div id="network" aria-label="Interactive Mistborn character graph"></div>
+          <button
+            type="button"
+            class="clear-selection-button"
+            id="clearSelectionButton"
+            aria-label="Clear selected character and show the full graph"
+            title="Clear selection"
+          >×</button>
+        </div>
 
         <div class="graph-controls">
-          <button class="btn primary" id="expandButton">Expand connections</button>
-          <button class="btn" id="focusedButton">Focus character</button>
-          <button class="btn" id="allButton">Show all characters</button>
+          <button class="btn primary" id="expandButton" disabled>Expand connections</button>
+          <button class="btn" id="focusedButton" disabled>Focus character</button>
+          <button class="btn active" id="allButton">Show all characters</button>
         </div>
 
         <div class="legend">
@@ -894,14 +816,6 @@
       F = The Final Empire
       W = The Well of Ascension
       H = The Hero of Ages
-
-      To add a character:
-      1. Add a unique object to characters.
-      2. Add their relationships to relationships.
-      3. Use existing IDs exactly as written.
-
-      This dataset is curated and should be checked against the books
-      before being treated as a complete character index.
     */
 
     const characters = [
@@ -1235,14 +1149,6 @@
       }
     ];
 
-    /*
-      Each relationship is:
-      [characterId1, characterId2, label, category]
-
-      The labels appear in the profile and when hovering over a line.
-      Lines are deliberately unlabeled by default to reduce clutter.
-    */
-
     const relationships = [
       ["vin", "kelsier", "Mentor and student", "crew"],
       ["vin", "elend", "Romantic partners", "romance"],
@@ -1341,7 +1247,6 @@
 
     const characterMap = new Map(characters.map(character => [character.id, character]));
 
-    // Keep only valid, unique character IDs and valid relationships.
     const uniqueRelationships = [];
     const seenRelationships = new Set();
 
@@ -1361,13 +1266,18 @@
     const directory = document.getElementById("directory");
     const details = document.getElementById("details");
     const networkContainer = document.getElementById("network");
+    const networkWrap = document.getElementById("networkWrap");
+    const clearSelectionButton = document.getElementById("clearSelectionButton");
 
     const graphNodes = new vis.DataSet([]);
     const graphEdges = new vis.DataSet([]);
 
-    let selectedId = "vin";
-    let viewMode = "focused";
+    // Start with no selected character and the entire network visible.
+    let selectedId = null;
+    let viewMode = "all";
     let expandedDepth = 1;
+    let updatingSelection = false;
+    let firstStabilizationComplete = false;
 
     const network = new vis.Network(
       networkContainer,
@@ -1380,17 +1290,29 @@
           keyboard: { enabled: true },
           multiselect: false,
           hideEdgesOnDrag: true,
-          tooltipDelay: 180
+          tooltipDelay: 180,
+          dragNodes: true,
+          dragView: true,
+          zoomView: true
         },
         physics: {
           enabled: true,
-          stabilization: { enabled: true, iterations: 150 },
+          stabilization: {
+            enabled: true,
+            iterations: 220,
+            updateInterval: 25,
+            fit: true
+          },
+          maxVelocity: 8,
+          minVelocity: 0.8,
+          timestep: 0.35,
+          adaptiveTimestep: true,
           barnesHut: {
             gravitationalConstant: -4300,
-            centralGravity: 0.25,
+            centralGravity: 0.22,
             springLength: 155,
-            springConstant: 0.035,
-            damping: 0.12,
+            springConstant: 0.025,
+            damping: 0.35,
             avoidOverlap: 0.35
           }
         },
@@ -1398,21 +1320,24 @@
           shape: "dot",
           size: 15,
           borderWidth: 1,
-          borderWidthSelected: 3,
+          borderWidthSelected: 2,
+          chosen: {
+            node: function(values) {
+              values.borderWidth = 2;
+            }
+          },
           font: {
             face: "Inter, Arial, sans-serif",
-            size: 12,
+            size: 11,
             color: "#f4f4f4",
             strokeWidth: 3,
             strokeColor: "#0c0c0c"
           },
-          shadow: {
-            enabled: false
-          }
+          shadow: { enabled: false }
         },
         edges: {
           width: 1.2,
-          selectionWidth: 2.5,
+          selectionWidth: 1,
           smooth: {
             enabled: true,
             type: "continuous",
@@ -1512,15 +1437,12 @@
         availableIds.has(edge.from) && availableIds.has(edge.to)
       );
 
-      if (viewMode === "all") {
+      // The default mode displays everyone allowed by the current filters.
+      if (viewMode === "all" || !selectedId || !availableIds.has(selectedId)) {
         return {
           characters: availableCharacters,
           relationships: edges
         };
-      }
-
-      if (!availableIds.has(selectedId)) {
-        return { characters: [], relationships: [] };
       }
 
       const adjacency = new Map();
@@ -1574,79 +1496,171 @@
       expandButton.classList.toggle("active", viewMode === "focused" && expandedDepth > 1);
       focusedButton.classList.toggle("active", viewMode === "focused");
       allButton.classList.toggle("active", viewMode === "all");
+
+      expandButton.disabled = !selectedId;
+      focusedButton.disabled = !selectedId;
+    }
+
+    function positionClearButton() {
+      if (!selectedId || viewMode === "all") {
+        clearSelectionButton.style.display = "none";
+        return;
+      }
+
+      const node = graphNodes.get(selectedId);
+      if (!node || node.hidden) {
+        clearSelectionButton.style.display = "none";
+        return;
+      }
+
+      const positions = network.getPositions([selectedId]);
+      const point = positions[selectedId];
+
+      if (!point || !Number.isFinite(point.x) || !Number.isFinite(point.y)) {
+        clearSelectionButton.style.display = "none";
+        return;
+      }
+
+      const canvasPoint = network.canvasToDOM(point);
+      const buttonSize = 25;
+
+      // Keep the X inside the graph area even when the node is near an edge.
+      const left = Math.max(4, Math.min(
+        canvasPoint.x + 13,
+        networkWrap.clientWidth - buttonSize - 4
+      ));
+      const top = Math.max(4, Math.min(
+        canvasPoint.y - 19,
+        networkWrap.clientHeight - buttonSize - 4
+      ));
+
+      clearSelectionButton.style.left = `${left}px`;
+      clearSelectionButton.style.top = `${top}px`;
+      clearSelectionButton.style.display = "flex";
     }
 
     function updateGraph(fit = false) {
       const visible = getVisibleNetwork();
+      const visibleIds = new Set(visible.characters.map(character => character.id));
 
-      const nodes = visible.characters.map(character => ({
-        id: character.id,
-        label: character.name,
-        title: `${character.name}\n${character.role}`,
-        shape: "dot",
-        size: character.id === selectedId ? 25 :
-          character.type === "main" ? 18 :
-          character.type === "historical" ? 14 : 13,
-        borderWidth: character.id === selectedId ? 3 : 1,
-        color: {
-          background: typeColors[character.type] || typeColors.supporting,
-          border: character.id === selectedId ? "#ffffff" :
-            typeColors[character.type] || typeColors.supporting,
-          highlight: {
-            background: "#e24b5d",
-            border: "#ffffff"
+      /*
+        IMPORTANT: keep all nodes and edges in the datasets and toggle their
+        hidden state. This preserves node positions and prevents the graph
+        from jumping around every time someone is selected.
+      */
+      const nodes = characters.map(character => {
+        const isSelected = character.id === selectedId;
+        const isVisible = visibleIds.has(character.id);
+        const color = typeColors[character.type] || typeColors.supporting;
+
+        return {
+          id: character.id,
+          label: character.name,
+          title: `${character.name}\n${character.role}`,
+          hidden: !isVisible,
+          shape: "dot",
+          size: isSelected ? 22 :
+            character.type === "main" ? 18 :
+            character.type === "historical" ? 14 : 13,
+          borderWidth: isSelected ? 2 : 1,
+          color: {
+            background: color,
+            border: isSelected ? "#ffffff" : color,
+            highlight: {
+              background: "#e24b5d",
+              border: "#ffffff"
+            },
+            hover: {
+              background: "#df4558",
+              border: "#ffffff"
+            }
           },
-          hover: {
-            background: "#df4558",
-            border: "#ffffff"
+          font: {
+            face: "Inter, Arial, sans-serif",
+            size: isSelected ? 13 : 11,
+            color: "#f4f4f4",
+            strokeWidth: 3,
+            strokeColor: "#0c0c0c"
           }
-        },
-        font: {
-          face: "Inter, Arial, sans-serif",
-          size: character.id === selectedId ? 14 : 11,
-          color: "#f4f4f4",
-          strokeWidth: 3,
-          strokeColor: "#0c0c0c"
-        }
-      }));
+        };
+      });
 
-      const edges = visible.relationships.map((relationship, index) => ({
-        id: `edge-${index}-${relationship.from}-${relationship.to}`,
-        from: relationship.from,
-        to: relationship.to,
-        label: "",
-        title: relationship.label,
-        color: {
-          color: relationColors[relationship.category] || relationColors.other,
-          highlight: "#e24b5d",
-          hover: "#e24b5d",
-          inherit: false
-        },
-        width: relationship.category === "family" || relationship.category === "romance" ? 1.8 : 1.1
-      }));
+      const visibleEdgeKeys = new Set(
+        visible.relationships.map(r => `${r.from}|${r.to}|${r.category}`)
+      );
 
-      graphNodes.clear();
-      graphEdges.clear();
-      graphNodes.add(nodes);
-      graphEdges.add(edges);
+      const edges = uniqueRelationships.map(relationship => {
+        const edgeKey = `${relationship.from}|${relationship.to}|${relationship.category}`;
+        const isVisible = visibleEdgeKeys.has(edgeKey);
 
-      document.getElementById("characterCount").textContent = nodes.length;
-      document.getElementById("relationshipCount").textContent = edges.length;
+        return {
+          id: `edge-${[relationship.from, relationship.to].sort().join("-")}-${relationship.category}`,
+          from: relationship.from,
+          to: relationship.to,
+          hidden: !isVisible,
+          label: "",
+          title: relationship.label,
+          color: {
+            color: relationColors[relationship.category] || relationColors.other,
+            highlight: "#e24b5d",
+            hover: "#e24b5d",
+            inherit: false
+          },
+          width: relationship.category === "family" || relationship.category === "romance" ? 1.5 : 1
+        };
+      });
+
+      // Update existing objects rather than clearing and recreating the graph.
+      graphNodes.update(nodes);
+      graphEdges.update(edges);
+
+      document.getElementById("characterCount").textContent = visible.characters.length;
+      document.getElementById("relationshipCount").textContent = visible.relationships.length;
 
       updateModeUI();
       renderDirectory();
 
-      if (selectedId && getCharacter(selectedId)) {
+      if (selectedId) {
         renderProfile(selectedId);
+      } else {
+        renderEmptyState();
       }
+
+      if (selectedId && visibleIds.has(selectedId)) {
+        updatingSelection = true;
+        network.selectNodes([selectedId]);
+        updatingSelection = false;
+      } else {
+        updatingSelection = true;
+        network.unselectAll();
+        updatingSelection = false;
+      }
+
+      positionClearButton();
 
       if (fit) {
         network.fit({
-          animation: { duration: 350, easingFunction: "easeInOutQuad" }
+          animation: {
+            duration: 220,
+            easingFunction: "easeInOutQuad"
+          }
         });
-      } else if (graphNodes.get(selectedId)) {
-        network.selectNodes([selectedId]);
       }
+    }
+
+    function renderEmptyState() {
+      details.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-mark">✦</div>
+          <h3>Explore the whole story</h3>
+          <p>
+            All characters and their known connections are shown on the map.
+            Click any character to view their profile and focus on their
+            immediate relationships. Use the × beside the selected character
+            to return to this full-network view.
+          </p>
+        </div>
+      `;
     }
 
     function renderDirectory() {
@@ -1682,7 +1696,10 @@
 
     function renderProfile(id) {
       const character = getCharacter(id);
-      if (!character) return;
+      if (!character) {
+        renderEmptyState();
+        return;
+      }
 
       const related = allowedRelationships()
         .filter(relationship =>
@@ -1751,7 +1768,7 @@
 
       const character = getCharacter(id);
 
-      // Make the selected character available if a previous filter hid them.
+      // Make the selected character available if a filter hid them.
       if (!passesBook(character)) {
         bookFilter.value = "all";
       }
@@ -1760,25 +1777,50 @@
         searchInput.value = "";
       }
 
-      updateGraph(true);
-      renderProfile(id);
+      updateGraph(false);
 
       if (graphNodes.get(id)) {
+        updatingSelection = true;
         network.selectNodes([id]);
+        updatingSelection = false;
+
+        // A short, gentle movement rather than a large graph bounce.
         network.focus(id, {
           scale: Math.max(network.getScale(), 0.8),
-          animation: { duration: 350, easingFunction: "easeInOutQuad" }
+          animation: {
+            duration: 200,
+            easingFunction: "easeInOutQuad"
+          }
         });
       }
+
+      positionClearButton();
+    }
+
+    function clearSelection() {
+      selectedId = null;
+      viewMode = "all";
+      expandedDepth = 1;
+
+      updatingSelection = true;
+      network.unselectAll();
+      updatingSelection = false;
+
+      updateGraph(true);
+      clearSelectionButton.style.display = "none";
     }
 
     function showFocusedNetwork() {
+      if (!selectedId) return;
+
       viewMode = "focused";
       expandedDepth = 1;
       updateGraph(true);
     }
 
     function expandNetwork() {
+      if (!selectedId) return;
+
       viewMode = "focused";
       expandedDepth = expandedDepth >= 3 ? 1 : expandedDepth + 1;
       updateGraph(true);
@@ -1793,44 +1835,63 @@
       searchInput.value = "";
       bookFilter.value = "all";
       relationFilter.value = "all";
-      selectedId = "vin";
-      viewMode = "focused";
+      selectedId = null;
+      viewMode = "all";
       expandedDepth = 1;
+
+      updatingSelection = true;
+      network.unselectAll();
+      updatingSelection = false;
+
       updateGraph(true);
+      clearSelectionButton.style.display = "none";
     }
 
     network.on("selectNode", params => {
-      if (!params.nodes.length) return;
+      if (updatingSelection || !params.nodes.length) return;
 
       const id = params.nodes[0];
-      selectedId = id;
-      viewMode = "focused";
-      expandedDepth = 1;
-
-      updateGraph(false);
-      renderProfile(id);
-    });
-
-    network.on("hoverEdge", params => {
-      const edge = graphEdges.get(params.edge);
-      if (!edge) return;
-
-      const relationship = uniqueRelationships.find(item =>
-        (item.from === edge.from && item.to === edge.to) ||
-        (item.from === edge.to && item.to === edge.from)
-      );
-
-      if (relationship) {
-        networkContainer.title = relationship.label;
+      if (id !== selectedId) {
+        selectCharacter(id);
       }
     });
 
-    network.on("blurEdge", () => {
-      networkContainer.title = "";
+    network.on("deselectNode", () => {
+      // The custom X is responsible for clearing the selection.
+      // Do not unexpectedly switch modes when a node is deselected.
+      positionClearButton();
+    });
+
+    network.on("afterDrawing", positionClearButton);
+    network.on("zoom", positionClearButton);
+    network.on("dragEnd", positionClearButton);
+    network.on("animationFinished", positionClearButton);
+    network.on("stabilized", () => {
+      if (!firstStabilizationComplete) {
+        firstStabilizationComplete = true;
+
+        // Once the initial layout settles, stop continuous physics.
+        // This prevents the graph from constantly drifting or bouncing.
+        network.setOptions({ physics: { enabled: false } });
+        network.fit({
+          animation: {
+            duration: 180,
+            easingFunction: "easeInOutQuad"
+          }
+        });
+      }
+
+      positionClearButton();
+    });
+
+    clearSelectionButton.addEventListener("click", event => {
+      event.preventDefault();
+      event.stopPropagation();
+      clearSelection();
     });
 
     searchInput.addEventListener("input", () => {
-      // Search is for finding a character, not automatically selecting one.
+      // Search filters the map and directory without selecting a character.
       updateGraph(true);
     });
 
@@ -1839,7 +1900,10 @@
 
     document.getElementById("fitButton").addEventListener("click", () => {
       network.fit({
-        animation: { duration: 350, easingFunction: "easeInOutQuad" }
+        animation: {
+          duration: 200,
+          easingFunction: "easeInOutQuad"
+        }
       });
     });
 
@@ -1848,9 +1912,9 @@
     document.getElementById("focusedButton").addEventListener("click", showFocusedNetwork);
     document.getElementById("allButton").addEventListener("click", showAllCharacters);
 
-    // Initial state: Vin and her immediate connections.
+    // Initial view: every character and every relationship, with no selection.
+    renderEmptyState();
     updateGraph(true);
-    renderProfile("vin");
   </script>
 </body>
 </html>
