@@ -1,639 +1,1716 @@
 
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cosmere Connection Board</title>
-<style>
-:root{color-scheme:dark;--bg:#050505;--panel:#101010;--muted:#aaa;--border:#303030}
-*{box-sizing:border-box}
-html,body{margin:0;min-height:100%;background:var(--bg);color:#f5f5f5;font:14px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-button,input,select{font:inherit;color:inherit;background:#101010;border:1px solid #424242;border-radius:8px;padding:9px 11px}
-button{cursor:pointer}button:hover{background:#222;border-color:#777}
-button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #fff;outline-offset:2px}
-a{color:#ddd}
-.app{min-height:100vh;display:grid;grid-template-rows:auto 1fr}
-.topbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--border);background:#080808;z-index:3}
-.brand{font-size:16px;font-weight:750;letter-spacing:.02em;margin-right:8px}.brand span{color:#aaa;font-weight:400}
-.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;flex:1}
-.tools input{min-width:160px;flex:1;max-width:310px}.tools select{max-width:230px}
-.zoom-controls{display:flex;gap:5px}.zoom-controls button{min-width:38px;font-size:18px;padding:6px 10px}
-.status{color:#aaa;font-size:12px;white-space:nowrap}
-.workspace{min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 310px}
-.canvas-wrap{position:relative;overflow:hidden;min-width:0;min-height:520px;background:#050505;touch-action:none}
-.canvas-wrap:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.12;background-image:radial-gradient(#777 .7px,transparent .7px);background-size:22px 22px}
-#board{display:block;width:100%;height:100%;min-height:520px;cursor:grab}#board.dragging{cursor:grabbing}
-.side{border-left:1px solid var(--border);background:#0a0a0a;padding:18px;overflow:auto}
-.side h2{font-size:14px;text-transform:uppercase;letter-spacing:.12em;margin:0 0 12px}
-.side p{color:#bdbdbd;margin:8px 0 14px}
-.legend{display:grid;gap:10px;margin:18px 0}.legend-row{display:flex;align-items:center;gap:9px;color:#ddd}
-.node-key{width:10px;height:10px;border:1px solid white;border-radius:50%;flex-shrink:0}.swatch{width:22px;height:2px;background:#fff;flex-shrink:0}
-.note{font-size:12px;color:#929292;border-top:1px solid #292929;padding-top:14px;margin-top:18px}
-.card{border:1px solid #333;border-radius:10px;padding:13px;margin-top:12px;background:#101010}
-.eyebrow{color:#aaa;text-transform:uppercase;letter-spacing:.1em;font-size:10px}.card h3{font-size:18px;margin:5px 0 8px}
-.pill{display:inline-block;border:1px solid #444;border-radius:99px;padding:3px 7px;font-size:11px;color:#ddd;margin:0 4px 5px 0}
-.related{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.related button{font-size:12px;padding:6px 8px}
-.empty{color:#aaa;font-size:13px}.footer-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
-#tooltip{position:absolute;display:none;pointer-events:none;z-index:2;background:#f5f5f5;color:#080808;padding:7px 10px;border-radius:7px;font-weight:650;font-size:12px;max-width:240px}
-@media(max-width:760px){.workspace{grid-template-columns:1fr;grid-template-rows:minmax(400px,1fr) auto}.side{border-left:0;border-top:1px solid var(--border);max-height:45vh}.topbar{padding:10px}.brand{width:100%}.tools input{max-width:none;min-width:130px}.tools select{max-width:48%}.status{width:100%}}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#a51d2d">
+  <title>Mistborn Character Connections</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+
+  <style>
+    :root {
+      --red: #a51d2d;
+      --red-dark: #741321;
+      --red-light: #f8e8eb;
+      --background: #f7f7f8;
+      --panel: #ffffff;
+      --text: #202124;
+      --muted: #70757d;
+      --border: #e4e5e7;
+      --shadow: 0 4px 18px rgba(0, 0, 0, 0.055);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--background);
+      color: var(--text);
+      font-family: Inter, Arial, sans-serif;
+      font-size: 14px;
+    }
+
+    button, input, select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .topbar {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      padding: 23px 30px;
+    }
+
+    .topbar-inner {
+      max-width: 1600px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-mark {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 46px;
+      height: 46px;
+      flex-shrink: 0;
+      color: #fff;
+      background: var(--red);
+      border-radius: 12px;
+      font-size: 25px;
+      font-weight: 800;
+    }
+
+    h1 {
+      font-size: 23px;
+      letter-spacing: -0.8px;
+      margin: 0 0 5px;
+      font-weight: 800;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .spoiler-label {
+      color: var(--red);
+      background: var(--red-light);
+      border-radius: 6px;
+      padding: 8px 11px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .page {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 24px 30px 36px;
+    }
+
+    .intro {
+      margin-bottom: 20px;
+    }
+
+    .intro h2 {
+      margin: 0 0 7px;
+      font-size: 18px;
+      letter-spacing: -0.4px;
+    }
+
+    .intro p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.65;
+      max-width: 800px;
+      font-size: 13px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .search-wrap {
+      flex: 1 1 260px;
+      position: relative;
+    }
+
+    .search-wrap input {
+      width: 100%;
+      height: 42px;
+      padding: 0 14px 0 39px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: white;
+      outline: none;
+    }
+
+    .search-wrap input:focus {
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px rgba(165, 29, 45, 0.09);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 12px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .filter-select {
+      height: 42px;
+      min-width: 180px;
+      padding: 0 12px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      color: var(--text);
+      outline: none;
+    }
+
+    .action-button {
+      height: 42px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: white;
+      padding: 0 14px;
+      color: var(--text);
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    .action-button:hover {
+      border-color: var(--red);
+      color: var(--red);
+    }
+
+    .action-button.primary {
+      color: white;
+      background: var(--red);
+      border-color: var(--red);
+    }
+
+    .action-button.primary:hover {
+      background: var(--red-dark);
+    }
+
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .stat {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 11px 15px;
+      min-width: 130px;
+    }
+
+    .stat-number {
+      font-size: 21px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 11px;
+      margin-top: 4px;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 330px;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .graph-panel,
+    .details-panel,
+    .directory-panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-heading {
+      min-height: 59px;
+      padding: 16px 19px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .panel-heading h3 {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .panel-subtitle {
+      color: var(--muted);
+      font-size: 11px;
+      margin-top: 4px;
+    }
+
+    #network {
+      height: 640px;
+      width: 100%;
+      background-color: #fff;
+      background-image: radial-gradient(#e9e9eb 0.8px, transparent 0.8px);
+      background-size: 20px 20px;
+    }
+
+    .graph-footer {
+      padding: 13px 17px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      color: var(--muted);
+      font-size: 11px;
+      align-items: center;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .legend-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+    }
+
+    .details-panel {
+      min-height: 640px;
+    }
+
+    .details-content {
+      padding: 20px;
+    }
+
+    .empty-state {
+      min-height: 450px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 25px;
+    }
+
+    .empty-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 58px;
+      height: 58px;
+      border-radius: 16px;
+      background: var(--red-light);
+      color: var(--red);
+      font-size: 27px;
+      margin-bottom: 16px;
+    }
+
+    .empty-state h3 {
+      font-size: 15px;
+      margin: 0 0 8px;
+    }
+
+    .empty-state p {
+      font-size: 12px;
+      line-height: 1.7;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .character-name {
+      font-size: 23px;
+      line-height: 1.25;
+      font-weight: 800;
+      letter-spacing: -0.8px;
+      margin: 0 0 9px;
+      overflow-wrap: anywhere;
+    }
+
+    .character-description {
+      font-size: 12px;
+      line-height: 1.75;
+      color: #555b63;
+      margin: 16px 0 20px;
+    }
+
+    .section-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin: 20px 0 10px;
+    }
+
+    .book-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .book-tag {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 10px;
+      font-weight: 700;
+      background: #f0f0f2;
+      color: #42454a;
+    }
+
+    .book-tag.f {
+      background: #f8e8eb;
+      color: #8b1d2b;
+    }
+
+    .book-tag.w {
+      background: #e8eefb;
+      color: #294f91;
+    }
+
+    .book-tag.h {
+      background: #e4f3e8;
+      color: #21633a;
+    }
+
+    .connection-list {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .connection-button {
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .connection-button:hover {
+      border-color: var(--red);
+      background: #fffafb;
+    }
+
+    .connection-name {
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .connection-type {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 400;
+      margin-top: 4px;
+    }
+
+    .arrow {
+      color: var(--red);
+      font-size: 16px;
+    }
+
+    .directory-panel {
+      margin-top: 18px;
+    }
+
+    .directory-content {
+      padding: 15px;
+    }
+
+    .directory-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    .directory-card {
+      text-align: left;
+      padding: 12px;
+      min-width: 0;
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 9px;
+    }
+
+    .directory-card:hover {
+      border-color: var(--red);
+      transform: translateY(-1px);
+    }
+
+    .directory-card strong {
+      display: block;
+      font-size: 12px;
+      line-height: 1.4;
+      overflow-wrap: anywhere;
+    }
+
+    .directory-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      margin-top: 6px;
+    }
+
+    .no-results {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 35px 15px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .disclaimer {
+      font-size: 11px;
+      line-height: 1.7;
+      color: var(--muted);
+      margin-top: 18px;
+    }
+
+    footer {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 0 30px 30px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.7;
+    }
+
+    footer a {
+      color: var(--red);
+    }
+
+    @media (max-width: 1100px) {
+      .workspace {
+        grid-template-columns: minmax(0, 1fr) 290px;
+      }
+
+      .directory-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 800px) {
+      .topbar {
+        padding: 17px;
+      }
+
+      .topbar-inner {
+        align-items: flex-start;
+      }
+
+      h1 {
+        font-size: 19px;
+      }
+
+      .page {
+        padding: 20px 14px 28px;
+      }
+
+      .workspace {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      #network {
+        height: 520px;
+      }
+
+      .details-panel {
+        min-height: auto;
+      }
+
+      .empty-state {
+        min-height: 230px;
+      }
+
+      .directory-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      footer {
+        padding: 0 14px 24px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .brand-mark {
+        width: 39px;
+        height: 39px;
+        font-size: 21px;
+      }
+
+      .spoiler-label {
+        font-size: 9px;
+        padding: 7px;
+      }
+
+      .subtitle {
+        max-width: 220px;
+        line-height: 1.5;
+      }
+
+      .filter-select {
+        flex: 1 1 140px;
+        min-width: 0;
+      }
+
+      .action-button {
+        flex: 1;
+      }
+
+      #network {
+        height: 440px;
+      }
+    }
+  </style>
 </head>
+
 <body>
-<div class="app">
-<header class="topbar">
-  <div class="brand">COSMERE <span>/ connection board</span></div>
-  <div class="tools">
-    <input id="search" type="search" placeholder="Search characters, worlds, magic, Shards…" aria-label="Search board">
-    <select id="seriesFilter" aria-label="Filter by series"><option value="all">All series / sources</option></select>
-    <select id="typeFilter" aria-label="Filter by node type">
-      <option value="all">All types</option>
-      <option value="world">Worlds / locations</option>
-      <option value="character">Characters</option>
-      <option value="event">Books / events</option>
-      <option value="concept">Cosmere concepts / groups</option>
-      <option value="shard">Shards</option>
-      <option value="magic">Magic systems</option>
-    </select>
-    <select id="cutoff" aria-label="Spoiler cutoff">
-      <option value="all">Spoilers: all included material</option>
-      <option value="elantris">Read through: Elantris</option>
-      <option value="mistborn1">Read through: The Final Empire</option>
-      <option value="mistborn3">Read through: The Hero of Ages</option>
-      <option value="mistborn4">Read through: The Lost Metal</option>
-      <option value="warbreaker">Read through: Warbreaker</option>
-      <option value="stormlight1">Read through: The Way of Kings</option>
-      <option value="stormlight2">Read through: Words of Radiance</option>
-      <option value="stormlight3">Read through: Oathbringer</option>
-      <option value="stormlight4">Read through: Rhythm of War</option>
-      <option value="stormlight5">Read through: Wind and Truth</option>
-      <option value="secret">Read through: Secret Projects</option>
-    </select>
-    <div class="zoom-controls"><button id="zoomOut" aria-label="Zoom out">−</button><button id="zoomIn" aria-label="Zoom in">+</button></div>
-    <button id="fitBoard">Fit board</button><button id="reset">Reset view</button>
-  </div>
-  <div class="status" id="status">Drag to pan · scroll or +/- to zoom · select a node</div>
-</header>
-<main class="workspace">
-<section class="canvas-wrap" id="canvasWrap" aria-label="Interactive Cosmere connection board">
-<svg id="board" role="img" aria-label="Interactive graph connecting Cosmere worlds, characters, Shards, and magic systems" viewBox="0 0 1500 1050"><g id="world"></g></svg>
-<div id="tooltip"></div>
-</section>
-<aside class="side" aria-live="polite">
-<h2 id="detailHeading">The board</h2>
-<p id="detailIntro">Explore the Cosmere through worlds, characters, Shards, magic systems, and cross-series connections.</p>
-<div id="detail"></div>
-<div class="legend">
-<div class="legend-row"><span class="node-key"></span> Character</div>
-<div class="legend-row"><span class="node-key" style="border-radius:2px"></span> Book / event</div>
-<div class="legend-row"><span class="node-key" style="transform:rotate(45deg);border-radius:0"></span> World / location</div>
-<div class="legend-row"><span class="node-key" style="border-radius:0;transform:rotate(45deg)"></span> Concept / group</div>
-<div class="legend-row"><span class="node-key" style="border-radius:0;width:12px;height:12px"></span> Shard</div>
-<div class="legend-row"><span class="node-key" style="border-radius:50%;width:12px;height:12px;border-style:dashed"></span> Magic system</div>
-<div class="legend-row"><span class="swatch"></span> Connection</div>
-</div>
-<div class="note">
-Research basis: Coppermind reference pages and the published Cosmere books. Character relationships and identity connections should be included only when supported by the books themselves. Implied identities are not presented as confirmed.
-<br><br>
-Spoiler cutoffs are approximate. A character's introduction and later revelations about that character can occur at different points. Verify individual claims against the relevant book before treating this board as a complete canon index.
-<br><br>
-Coppermind is a fan-maintained wiki and may include author interviews, annotations, and other non-book material. This board's intended standard is book-text evidence only.
-</div>
-<div class="footer-actions"><button id="showAll">Clear filters</button><button id="downloadData">Export graph JSON</button></div>
-<p style="font-size:11px;color:#777">Reference: <a href="https://coppermind.net/wiki/Cosmere" target="_blank" rel="noopener">Coppermind: Cosmere</a> · <a href="https://coppermind.net/wiki/Coppermind:Welcome" target="_blank" rel="noopener">Welcome / spoiler notice</a></p>
-</aside>
-</main>
-</div>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-mark">M</div>
+        <div>
+          <h1>Mistborn Character Connections</h1>
+          <div class="subtitle">A character relationship explorer · Era 1</div>
+        </div>
+      </div>
+      <div class="spoiler-label">FULL TRILOGY SPOILERS</div>
+    </div>
+  </header>
 
-<script>
-const books={
-  elantris:1,
-  mistborn1:2,
-  mistborn3:3,
-  warbreaker:4,
-  stormlight1:5,
-  stormlight2:6,
-  stormlight3:7,
-  stormlight4:8,
-  mistborn4:9,
-  stormlight5:10,
-  secret:11,
-  all:99
-};
+  <main class="page">
+    <section class="intro">
+      <h2>Explore the people of the Final Empire</h2>
+      <p>
+        Discover the characters from Brandon Sanderson's original Mistborn
+        trilogy and explore how their stories connect. Select a character
+        in the graph or directory to see their profile and known relationships.
+      </p>
+    </section>
 
-const nodes=[
-{id:"cosmere",name:"The Cosmere",type:"concept",series:"Cosmere fundamentals",world:"Cosmere",book:"elantris",x:750,y:70,desc:"The shared fictional universe connecting many of Brandon Sanderson's adult fantasy works. Its stories share cosmology, underlying magical principles, and recurring people and organizations.",tags:["shared universe","worldhopping","magic"]},
-{id:"adonalsium",name:"Adonalsium",type:"concept",series:"Cosmere fundamentals",world:"Yolen / Cosmere",book:"stormlight3",x:750,y:180,desc:"The primordial power or being associated with creation. In the Shattering, its power was divided into sixteen Shards. The full nature and motives of Adonalsium remain partly mysterious.",tags:["creation","Shattering","sixteen Shards"]},
-{id:"shattering",name:"The Shattering",type:"event",series:"Cosmere fundamentals",world:"Yolen",book:"stormlight3",x:500,y:290,desc:"The ancient event in which Adonalsium was Shattered and sixteen Shards were taken up by Vessels.",tags:["Yolen","Vessels","Shards"]},
-{id:"investiture",name:"Investiture",type:"concept",series:"Cosmere fundamentals",world:"Cosmere",book:"elantris",x:1000,y:290,desc:"The spiritual energy underlying Cosmere magic. It appears in different forms and is associated with Shards, worlds, people, and magical systems.",tags:["spiritual energy","magic","Shards"]},
-{id:"realmatic",name:"Realmatic Theory",type:"concept",series:"Cosmere fundamentals",world:"Cosmere",book:"elantris",x:1250,y:290,desc:"The framework describing the Physical, Cognitive, and Spiritual Realms and how they interact.",tags:["three Realms","spiritweb","cosmology"]},
-{id:"physical-realm",name:"Physical Realm",type:"concept",series:"Cosmere fundamentals",world:"Cosmere",book:"elantris",x:1120,y:410,desc:"The realm of physical matter and ordinary space, where the familiar planets and bodies of the Cosmere exist.",tags:["matter","planets","space"]},
-{id:"cognitive-realm",name:"Cognitive Realm / Shadesmar",type:"concept",series:"Cosmere fundamentals",world:"Cosmere",book:"elantris",x:1250,y:510,desc:"The realm associated with thought and perception. Its geography reflects how things are perceived, and travel through it is one way to move between worlds.",tags:["thought","Shadesmar","worldhopping"]},
-{id:"spiritual-realm",name:"Spiritual Realm",type:"concept",series:"Cosmere fundamentals",world:"Cosmere",book:"elantris",x:1120,y:610,desc:"The realm associated with essence and Connections. Its workings remain mysterious.",tags:["essence","Connection","future sight"]},
-{id:"perpendicularity",name:"Perpendicularities",type:"concept",series:"Cosmere fundamentals",world:"Multiple worlds",book:"elantris",x:1000,y:730,desc:"Junctions where the Realms come close together, often through concentrated Investiture. They can provide routes between the Physical and Cognitive Realms.",tags:["Realmatic Theory","worldhopping","Investiture"]},
-{id:"worldhoppers",name:"Worldhoppers",type:"concept",series:"Cosmere fundamentals",world:"Multiple worlds",book:"elantris",x:750,y:820,desc:"People who travel between planets, often using the Cognitive Realm and perpendicularities.",tags:["travel","Cognitive Realm","crossovers"]},
-{id:"seventeenth-shard",name:"The Seventeenth Shard",type:"concept",series:"Cosmere fundamentals",world:"Silverlight / Cosmere",book:"stormlight1",x:500,y:820,desc:"A mysterious organization of worldhoppers associated with Silverlight.",tags:["worldhoppers","Silverlight","organization"]},
-{id:"silverlight",name:"Silverlight",type:"world",series:"Cosmere fundamentals",world:"Cognitive Realm",book:"stormlight1",x:250,y:820,desc:"A city in the Cognitive Realm associated with scholars and worldhoppers.",tags:["Cognitive Realm","scholars","worldhoppers"]},
-{id:"shards",name:"The Sixteen Shards",type:"concept",series:"Cosmere fundamentals",world:"Cosmere",book:"stormlight3",x:750,y:400,desc:"Sixteen portions of Adonalsium's power, each associated with an Intent. A person who takes up a Shard is called its Vessel.",tags:["Intent","Vessels","Shattering"]},
-{id:"preservation",name:"Preservation",type:"shard",series:"Mistborn",world:"Scadrial",book:"mistborn1",x:300,y:430,desc:"A Shard associated with preserving and maintaining. It and Ruin jointly created Scadrial.",tags:["Leras","Allomancy","Scadrial"]},
-{id:"ruin",name:"Ruin",type:"shard",series:"Mistborn",world:"Scadrial",book:"mistborn1",x:300,y:550,desc:"A Shard associated with destruction and decay. It and Preservation jointly created Scadrial.",tags:["Ati","Hemalurgy","Scadrial"]},
-{id:"harmony",name:"Harmony",type:"shard",series:"Mistborn Era 2",world:"Scadrial",book:"mistborn3",x:300,y:670,desc:"The combined Shard formed when Sazed took up both Preservation and Ruin.",tags:["Sazed","Preservation","Ruin"]},
-{id:"honor",name:"Honor",type:"shard",series:"Stormlight Archive",world:"Roshar",book:"stormlight1",x:750,y:500,desc:"A Shard associated with oaths and bonds, originally held by Tanavast. Its legacy is connected to spren and the Knights Radiant.",tags:["Tanavast","oaths","spren"]},
-{id:"cultivation",name:"Cultivation",type:"shard",series:"Stormlight Archive",world:"Roshar",book:"stormlight1",x:900,y:500,desc:"A Shard associated with growth and directed change, resident in the Rosharan system.",tags:["growth","Roshar","Old Magic"]},
-{id:"odium",name:"Odium",type:"shard",series:"Stormlight Archive",world:"Roshar / beyond",book:"stormlight1",x:1050,y:500,desc:"A Shard associated with hatred and powerful emotion. Its conflict with other Shards is central to the wider Cosmere story.",tags:["conflict","Roshar","Vessel changes"]},
-{id:"retribution",name:"Retribution",type:"shard",series:"Stormlight Archive",world:"Roshar",book:"stormlight5",x:900,y:380,desc:"A combined Shard associated with the events of Wind and Truth. This is a major later-Stormlight spoiler.",tags:["Honor","Odium","Wind and Truth"]},
-{id:"endowment",name:"Endowment",type:"shard",series:"Warbreaker",world:"Nalthis",book:"warbreaker",x:1150,y:180,desc:"The Shard associated with Nalthis and the magic of BioChromatic Breath.",tags:["Nalthis","Breath","Returned"]},
-{id:"devotion",name:"Devotion",type:"shard",series:"Elantris",world:"Sel",book:"elantris",x:100,y:430,desc:"A Shard associated with Sel. Its power, together with Dominion's, has unusual consequences for the Cognitive Realm around Sel.",tags:["Sel","Aona","Dor"]},
-{id:"dominion",name:"Dominion",type:"shard",series:"Elantris",world:"Sel",book:"elantris",x:100,y:550,desc:"A Shard associated with Sel. The power of both Devotion and Dominion is tied to the Dor.",tags:["Sel","Skai","Dor"]},
-{id:"autonomy",name:"Autonomy",type:"shard",series:"Multiple series",world:"Multiple worlds",book:"stormlight3",x:1300,y:180,desc:"A Shard associated with autonomy and independence, known for using avatars and influencing multiple worlds.",tags:["avatars","Taldain","First of the Sun"]},
-{id:"yolen",name:"Yolen",type:"world",series:"Cosmere fundamentals",world:"Yolen",book:"stormlight3",x:500,y:180,desc:"An ancient world associated with Adonalsium and the Shattering.",tags:["Adonalsium","Shattering","ancient history"]},
-{id:"sel",name:"Sel",type:"world",series:"Elantris",world:"Sel",book:"elantris",x:100,y:180,desc:"The world of Elantris and The Emperor's Soul. Selish magic is strongly shaped by geography and the Dor.",tags:["Elantris","The Emperor's Soul","Dor"]},
-{id:"scadrial",name:"Scadrial",type:"world",series:"Mistborn",world:"Scadrial",book:"mistborn1",x:300,y:180,desc:"The world of Mistborn, created by Preservation and Ruin. Its best-known magic systems involve Allomancy, Feruchemy, and Hemalurgy.",tags:["Mistborn","metallic arts","Preservation / Ruin"]},
-{id:"roshar",name:"Roshar",type:"world",series:"Stormlight Archive",world:"Roshar",book:"stormlight1",x:750,y:180,desc:"The world of the Stormlight Archive, known for spren, highstorms, and Surgebinding.",tags:["Stormlight Archive","spren","Surgebinding"]},
-{id:"nalthis",name:"Nalthis",type:"world",series:"Warbreaker",world:"Nalthis",book:"warbreaker",x:1150,y:300,desc:"The world of Warbreaker, where BioChromatic Breath is central to the magic system.",tags:["Warbreaker","Breath","Awakening"]},
-{id:"taldain",name:"Taldain",type:"world",series:"White Sand",world:"Taldain",book:"elantris",x:1350,y:300,desc:"The world of White Sand, known for its Dayside and Darkside environments and sand mastery.",tags:["White Sand","sand mastery","Autonomy"]},
-{id:"first-sun",name:"First of the Sun",type:"world",series:"Sixth of the Dusk",world:"Drominad system",book:"secret",x:1350,y:430,desc:"An oceanic world featured in Sixth of the Dusk, known for dangerous islands and Aviar.",tags:["Sixth of the Dusk","Aviar","Patji"]},
-{id:"lumar",name:"Lumar",type:"world",series:"Tress of the Emerald Sea",world:"Lumar",book:"secret",x:1350,y:550,desc:"The world of Tress of the Emerald Sea, notable for seas of dangerous spores.",tags:["Tress","Aether spores","moons"]},
-{id:"canticle",name:"Canticle",type:"world",series:"The Sunlit Man",world:"Canticle",book:"secret",x:1350,y:670,desc:"The setting of The Sunlit Man, a world with a dangerous solar cycle and Investiture-related phenomena.",tags:["The Sunlit Man","sunhearts","Investiture"]},
-{id:"komashi",name:"Komashi",type:"world",series:"Yumi and the Nightmare Painter",world:"Komashi system",book:"secret",x:1150,y:820,desc:"The world associated with Yumi and the Nightmare Painter, with a distinctive relationship between spirits and art.",tags:["Yumi","spirits","Secret Project"]},
-{id:"threnody",name:"Threnody",type:"world",series:"Shadows for Silence in the Forests of Hell",world:"Threnody",book:"secret",x:1350,y:820,desc:"The world associated with Shadows for Silence in the Forests of Hell, known for supernatural dangers.",tags:["Shadows for Silence","shades","survival"]},
-{id:"reod",name:"The Reod",type:"event",series:"Elantris",world:"Sel",book:"elantris",x:100,y:300,desc:"The catastrophe that transformed Elantris and its inhabitants, central to the mystery in Elantris.",tags:["history","Elantris","magic"]},
-{id:"dor",name:"The Dor",type:"magic",series:"Elantris",world:"Sel",book:"elantris",x:100,y:670,desc:"A vast power associated with Devotion and Dominion and with Sel's magic systems.",tags:["Devotion","Dominion","Selish magic"]},
-{id:"selish-magic",name:"Selish magic systems",type:"magic",series:"Elantris",world:"Sel",book:"elantris",x:100,y:790,desc:"Sel features multiple regionally shaped forms of magic, including AonDor and the soulstamping of The Emperor's Soul.",tags:["AonDor","Forgery","geography"]},
-{id:"final-empire",name:"The Final Empire",type:"event",series:"Mistborn Era 1",world:"Scadrial",book:"mistborn1",x:300,y:300,desc:"The political order overthrown in the first Mistborn novel. The rebellion against the Lord Ruler has consequences throughout the original trilogy.",tags:["Lord Ruler","rebellion","Mistborn Era 1"]},
-{id:"metallic-arts",name:"The Metallic Arts",type:"magic",series:"Mistborn",world:"Scadrial",book:"mistborn1",x:300,y:790,desc:"The umbrella term for Allomancy, Feruchemy, and Hemalurgy.",tags:["Allomancy","Feruchemy","Hemalurgy"]},
-{id:"kelsier",name:"Kelsier",type:"character",series:"Mistborn Era 1",world:"Scadrial",book:"mistborn1",x:420,y:430,desc:"A charismatic crew leader and central figure in the original Mistborn trilogy. His actions and legacy have implications beyond the first novel.",tags:["Survivor","Mistborn","Scadrial"]},
-{id:"vin",name:"Vin",type:"character",series:"Mistborn Era 1",world:"Scadrial",book:"mistborn1",x:420,y:550,desc:"A central Mistborn protagonist whose abilities and choices shape the conflict with the Lord Ruler and the larger struggle on Scadrial.",tags:["Mistborn","Allomancy","crew"]},
-{id:"sazed",name:"Sazed",type:"character",series:"Mistborn Era 1",world:"Scadrial",book:"mistborn3",x:420,y:670,desc:"A Terris Keeper whose knowledge, faith, and choices become pivotal to the end of the original Mistborn trilogy.",tags:["Terris","Feruchemy","Harmony"]},
-{id:"allomancy",name:"Allomancy",type:"magic",series:"Mistborn",world:"Scadrial",book:"mistborn1",x:520,y:790,desc:"A metallic art in which ingesting and burning particular metals grants specific abilities.",tags:["metals","Preservation","Mistborn"]},
-{id:"feruchemy",name:"Feruchemy",type:"magic",series:"Mistborn",world:"Scadrial",book:"mistborn1",x:420,y:900,desc:"A metallic art in which a practitioner stores attributes in metalminds and later retrieves them.",tags:["metalminds","Terris","balance"]},
-{id:"hemalurgy",name:"Hemalurgy",type:"magic",series:"Mistborn",world:"Scadrial",book:"mistborn1",x:300,y:900,desc:"A metallic art that uses metal spikes to steal or transfer aspects of a person's abilities.",tags:["spikes","Ruin","metallic arts"]},
-{id:"stormlight",name:"Stormlight",type:"concept",series:"Stormlight Archive",world:"Roshar",book:"stormlight1",x:750,y:300,desc:"Investiture carried in infused gemstones and highstorms, used by many Rosharan magical traditions, including Surgebinding.",tags:["highstorms","gemstones","Investiture"]},
-{id:"surgebinding",name:"Surgebinding",type:"magic",series:"Stormlight Archive",world:"Roshar",book:"stormlight1",x:750,y:650,desc:"A Rosharan magic system associated with the Surges and, for the Knights Radiant, bonds with spren and the swearing of Ideals.",tags:["Surges","spren","Stormlight"]},
-{id:"knights-radiant",name:"Knights Radiant",type:"concept",series:"Stormlight Archive",world:"Roshar",book:"stormlight1",x:900,y:650,desc:"Orders of Surgebinders bonded to spren. Their powers, Ideals, and history are central to the Stormlight Archive.",tags:["orders","spren","Ideals"]},
-{id:"shallan",name:"Shallan Davar",type:"character",series:"Stormlight Archive",world:"Roshar",book:"stormlight1",x:900,y:790,desc:"A major Stormlight Archive viewpoint character whose artistic abilities, personal history, and relationship with spren are important to the series.",tags:["Lightweaver","Roshar","Surgebinding"]},
-{id:"kaladin",name:"Kaladin Stormblessed",type:"character",series:"Stormlight Archive",world:"Roshar",book:"stormlight1",x:750,y:790,desc:"A central Stormlight Archive character associated with protection, leadership, and the Windrunner order of Knights Radiant.",tags:["Windrunner","Roshar","Surgebinding"]},
-{id:"dalinar",name:"Dalinar Kholin",type:"character",series:"Stormlight Archive",world:"Roshar",book:"stormlight1",x:900,y:900,desc:"A central political and military figure in the Stormlight Archive whose visions, choices, and connections to Honor shape major events.",tags:["Kholin","Honor","Bondsmith"]},
-{id:"spren",name:"Spren",type:"concept",series:"Stormlight Archive",world:"Roshar / Cognitive Realm",book:"stormlight1",x:1050,y:650,desc:"Cognitive entities associated with thoughts, emotions, natural phenomena, and other concepts. Certain spren form bonds with humans and enable Radiant abilities.",tags:["Cognitive Realm","Radiants","Roshar"]},
-{id:"breath",name:"BioChromatic Breath",type:"magic",series:"Warbreaker",world:"Nalthis",book:"warbreaker",x:1150,y:430,desc:"A form of Investiture associated with Nalthis. Breath can be transferred between people and is used in Awakening.",tags:["Endowment","Awakening","Nalthis"]},
-{id:"awakening",name:"Awakening",type:"magic",series:"Warbreaker",world:"Nalthis",book:"warbreaker",x:1150,y:550,desc:"A Nalthis magic system that uses Breath and commands to Awaken objects.",tags:["Breath","commands","Warbreaker"]},
-{id:"hoid",name:"Hoid",type:"character",series:"Multiple series",world:"Multiple worlds",book:"elantris",x:750,y:950,desc:"A recurring worldhopper who appears under different names and roles across Cosmere stories.",tags:["worldhopper","Wit","cross-series"]},
-{id:"khriss",name:"Khriss",type:"character",series:"Multiple series",world:"Multiple worlds",book:"elantris",x:1050,y:950,desc:"A scholar associated with cosmere-wide knowledge and explanatory essays in supplementary material. This board should only treat character facts established in books as confirmed.",tags:["scholar","Ars Arcanum","Investiture"]},
-{id:"tress",name:"Tress",type:"character",series:"Tress of the Emerald Sea",world:"Lumar",book:"secret",x:1350,y:950,desc:"The protagonist of Tress of the Emerald Sea, a story set on Lumar.",tags:["Lumar","spores","Secret Project"]},
-{id:"sixth-dusk",name:"Sixth of the Dusk",type:"event",series:"Sixth of the Dusk",world:"First of the Sun",book:"secret",x:1350,y:760,desc:"A novella set on First of the Sun, featuring its dangerous environment and Aviar.",tags:["First of the Sun","Aviar","worldhopping"]},
-{id:"white-sand",name:"White Sand",type:"event",series:"White Sand",world:"Taldain",book:"elantris",x:1350,y:180,desc:"The story set on Taldain, featuring sand mastery and the planet's unusual Dayside/Darkside geography.",tags:["Taldain","sand mastery","Autonomy"]},
-{id:"warbreaker",name:"Warbreaker",type:"event",series:"Warbreaker",world:"Nalthis",book:"warbreaker",x:1150,y:670,desc:"A standalone novel set on Nalthis, featuring BioChromatic Breath and Awakening.",tags:["Nalthis","Breath","Awakening"]},
-{id:"elantris-book",name:"Elantris",type:"event",series:"Elantris",world:"Sel",book:"elantris",x:100,y:900,desc:"A novel set on Sel, centered on the fallen city of Elantris, the Reod, and the magic of AonDor.",tags:["Sel","AonDor","The Reod"]},
-{id:"emperor-soul",name:"The Emperor's Soul",type:"event",series:"Elantris",world:"Sel",book:"elantris",x:220,y:900,desc:"A novella set on Sel that features Forgery, a magic involving the alteration of an object's or person's history through intricate stamps.",tags:["Sel","Forgery","Shai"]},
-{id:"taldain-sand",name:"Sand mastery",type:"magic",series:"White Sand",world:"Taldain",book:"elantris",x:1350,y:650,desc:"The distinctive magic featured in White Sand, involving control of sand through a process linked to Investiture and Taldain's environment.",tags:["White Sand","Taldain","Investiture"]},
+    <section class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input
+          id="search"
+          type="search"
+          placeholder="Search characters..."
+          aria-label="Search characters"
+        >
+      </div>
 
-{id:"elend",name:"Elend Venture",type:"character",series:"Mistborn Era 1",world:"Scadrial",book:"mistborn1",x:520,y:430,desc:"A nobleman who becomes an ally of Vin and a central figure in the struggle against the Lord Ruler. He is interested in philosophy and political reform.",tags:["Venture","Vin","politics"]},
-{id:"marsh",name:"Marsh",type:"character",series:"Mistborn Era 1",world:"Scadrial",book:"mistborn1",x:520,y:520,desc:"Kelsier's brother and an Allomancer who infiltrates the Steel Ministry as part of the rebellion.",tags:["Kelsier","Steel Ministry","Inquisitors"]},
-{id:"spook",name:"Spook",type:"character",series:"Mistborn Era 1",world:"Scadrial",book:"mistborn1",x:520,y:610,desc:"A young Tineye who joins Kelsier's crew. His birth name is Lestibournes.",tags:["Lestibournes","Kelsier's crew","Tin"]},
-{id:"breeze",name:"Breeze",type:"character",series:"Mistborn Era 1",world:"Scadrial",book:"mistborn1",x:520,y:700,desc:"A member of Kelsier's crew who specializes in soothing people's emotions through Allomancy.",tags:["Soother","Kelsier's crew","Allomancy"]},
-{id:"ham",name:"Hammond (Ham)",type:"character",series:"Mistborn Era 1",world:"Scadrial",book:"mistborn1",x:620,y:430,desc:"A member of Kelsier's crew and a Pewterarm who uses Allomancy to enhance his physical abilities.",tags:["Pewterarm","Kelsier's crew","Allomancy"]},
-{id:"clubs",name:"Clubs",type:"character",series:"Mistborn Era 1",world:"Scadrial",book:"mistborn1",x:620,y:520,desc:"A member of Kelsier's crew and a Smoker who burns copper to conceal Allomantic activity.",tags:["Smoker","Kelsier's crew","Allomancy"]},
-{id:"dockson",name:"Dockson",type:"character",series:"Mistborn Era 1",world:"Scadrial",book:"mistborn1",x:620,y:610,desc:"A close associate of Kelsier who helps organize and manage the crew's rebellion against the Final Empire.",tags:["Kelsier's crew","rebellion","planning"]},
-{id:"tindwyl",name:"Tindwyl",type:"character",series:"Mistborn Era 1",world:"Scadrial",book:"mistborn3",x:620,y:700,desc:"A Terris Keeper who helps train Elend in leadership and political matters.",tags:["Terris","Keeper","Elend"]},
-{id:"tensoon",name:"TenSoon",type:"character",series:"Mistborn Era 1",world:"Scadrial",book:"mistborn3",x:420,y:760,desc:"A kandra who becomes involved with Vin and the events surrounding the original Mistborn trilogy.",tags:["Kandra","Vin","Scadrial"]},
+      <select id="bookFilter" class="filter-select" aria-label="Filter by book">
+        <option value="all">All three books</option>
+        <option value="F">The Final Empire</option>
+        <option value="W">The Well of Ascension</option>
+        <option value="H">The Hero of Ages</option>
+      </select>
 
-{id:"wax",name:"Waxillium Ladrian",type:"character",series:"Mistborn Era 2",world:"Scadrial",book:"mistborn4",x:400,y:1020,desc:"A lawman from the Roughs who returns to Elendel and investigates criminal activity. He is a Twinborn who combines Allomancy and Feruchemy.",tags:["Wax","Twinborn","Elendel"]},
-{id:"wayne",name:"Wayne",type:"character",series:"Mistborn Era 2",world:"Scadrial",book:"mistborn4",x:520,y:1020,desc:"Wax's close friend and investigative partner. He is a Twinborn known for disguises and impersonations.",tags:["Wax","Twinborn","partner"]},
-{id:"marasi",name:"Marasi Colms",type:"character",series:"Mistborn Era 2",world:"Scadrial",book:"mistborn4",x:640,y:1020,desc:"A law enforcement officer and investigator who works with Wax and Wayne.",tags:["Wax","Wayne","investigation"]},
-{id:"steris",name:"Steris Harms",type:"character",series:"Mistborn Era 2",world:"Scadrial",book:"mistborn4",x:760,y:1020,desc:"A member of House Harms whose relationship with Wax develops over Era 2. She is methodical, practical, and skilled at planning.",tags:["Wax","House Harms","planning"]},
-{id:"melaan",name:"MeLaan",type:"character",series:"Mistborn Era 2",world:"Scadrial",book:"mistborn4",x:880,y:1020,desc:"A kandra who becomes an ally of Marasi and other characters in Era 2.",tags:["Kandra","Marasi","Scadrial"]},
+      <select id="relationFilter" class="filter-select" aria-label="Filter relationship types">
+        <option value="all">All relationships</option>
+        <option value="family">Family</option>
+        <option value="romance">Romance</option>
+        <option value="ally">Allies</option>
+        <option value="enemy">Enemies</option>
+        <option value="crew">Crew and associates</option>
+        <option value="other">Other connections</option>
+      </select>
 
-{id:"adolin",name:"Adolin Kholin",type:"character",series:"Stormlight Archive",world:"Roshar",book:"stormlight1",x:1020,y:790,desc:"A son of Dalinar Kholin and a skilled Shardbearer who plays a major role in Alethi politics and the events surrounding the Kholin family.",tags:["Kholin","Dalinar","Shardbearer"]},
-{id:"jasnah",name:"Jasnah Kholin",type:"character",series:"Stormlight Archive",world:"Roshar",book:"stormlight1",x:1020,y:880,desc:"A scholar and member of the Kholin family. Her research and decisions play an important role in the Stormlight Archive.",tags:["Kholin","scholar","Shallan"]},
-{id:"navani",name:"Navani Kholin",type:"character",series:"Stormlight Archive",world:"Roshar",book:"stormlight1",x:1140,y:790,desc:"A member of the Kholin family whose expertise in engineering and fabrials becomes increasingly important to Roshar's conflicts.",tags:["Kholin","fabrials","engineering"]},
-{id:"szeth",name:"Szeth-son-son-Vallano",type:"character",series:"Stormlight Archive",world:"Roshar",book:"stormlight1",x:1140,y:880,desc:"A Shin assassin whose actions set major events in motion. His relationship with his oaths and the truth about his status develops throughout the series.",tags:["Shin","assassin","oaths"]},
-{id:"renarin",name:"Renarin Kholin",type:"character",series:"Stormlight Archive",world:"Roshar",book:"stormlight1",x:1260,y:790,desc:"A son of Dalinar Kholin whose role in the Knights Radiant develops over the series.",tags:["Kholin","Dalinar","Radiants"]},
-{id:"mraize",name:"Mraize",type:"character",series:"Stormlight Archive",world:"Roshar",book:"stormlight2",x:1260,y:880,desc:"A Rosharan operative of the Ghostbloods who recruits and directs Shallan on assignments for the organization.",tags:["Ghostbloods","Shallan","Roshar"]},
-{id:"iyatil",name:"Iyatil",type:"character",series:"Stormlight Archive",world:"Roshar",book:"stormlight2",x:1380,y:790,desc:"A member of the Ghostbloods who operates above Mraize in the organization's chain of command.",tags:["Ghostbloods","Mraize","organization"]},
-{id:"thaidakar",name:"Thaidakar",type:"character",series:"Stormlight Archive",world:"Multiple worlds",book:"stormlight4",x:1380,y:880,desc:"The leader of the Ghostbloods, referred to by that name in the Stormlight Archive. The books do not explicitly identify him as Kelsier in the relevant passage; this board does not equate them.",tags:["Ghostbloods","Lord of Scars","identity not explicitly stated"]},
-{id:"heralds",name:"The Heralds",type:"concept",series:"Stormlight Archive",world:"Roshar",book:"stormlight1",x:1020,y:970,desc:"Ten figures central to Rosharan history and the traditions surrounding the Knights Radiant.",tags:["Roshar","Knights Radiant","history"]},
-{id:"ghostbloods",name:"The Ghostbloods",type:"concept",series:"Stormlight Archive",world:"Multiple worlds",book:"stormlight2",x:1260,y:970,desc:"A secretive organization operating on Roshar whose objectives extend beyond ordinary Rosharan politics.",tags:["Thaidakar","Mraize","Iyatil","organization"]}
-];
+      <button class="action-button" id="resetButton">Reset view</button>
+      <button class="action-button primary" id="fitButton">Fit graph</button>
+    </section>
 
-const links=[
-["cosmere","adonalsium","creation history"],
-["adonalsium","shattering","associated with"],
-["shattering","shards","divided into"],
-["shards","investiture","source of many magic systems"],
-["investiture","realmatic","interacts across the Realms"],
-["realmatic","physical-realm","includes"],
-["realmatic","cognitive-realm","includes"],
-["realmatic","spiritual-realm","includes"],
-["cognitive-realm","perpendicularity","can be entered through"],
-["perpendicularity","worldhoppers","used for travel by"],
-["worldhoppers","silverlight","associated with"],
-["seventeenth-shard","silverlight","associated with"],
-["worldhoppers","hoid","includes"],
-["worldhoppers","khriss","includes scholars such as"],
-["yolen","shattering","ancient setting of"],
-["sel","devotion","associated Shard"],
-["sel","dominion","associated Shard"],
-["devotion","dor","power contributes to"],
-["dominion","dor","power contributes to"],
-["dor","selish-magic","underlies"],
-["selish-magic","reod","AonDor features in"],
-["sel","elantris-book","setting of"],
-["sel","emperor-soul","setting of"],
-["scadrial","preservation","associated Shard"],
-["scadrial","ruin","associated Shard"],
-["preservation","ruin","opposing Intents"],
-["preservation","allomancy","associated with"],
-["ruin","hemalurgy","associated with"],
-["preservation","harmony","combined into"],
-["ruin","harmony","combined into"],
-["harmony","sazed","Vessel is"],
-["scadrial","final-empire","setting of"],
-["final-empire","kelsier","rebellion led by"],
-["kelsier","vin","mentor and ally"],
-["vin","allomancy","practices"],
-["sazed","feruchemy","practices"],
-["metallic-arts","allomancy","includes"],
-["metallic-arts","feruchemy","includes"],
-["metallic-arts","hemalurgy","includes"],
-["roshar","honor","associated Shard"],
-["roshar","cultivation","associated Shard"],
-["roshar","odium","associated Shard"],
-["honor","retribution","associated with later combined Shard"],
-["odium","retribution","associated with later combined Shard"],
-["roshar","stormlight","setting for"],
-["stormlight","surgebinding","powers"],
-["surgebinding","knights-radiant","used by"],
-["knights-radiant","spren","bond with"],
-["shallan","knights-radiant","Lightweaver"],
-["kaladin","knights-radiant","Windrunner"],
-["dalinar","honor","connected to Honor's legacy"],
-["shallan","roshar","lives on"],
-["kaladin","roshar","lives on"],
-["dalinar","roshar","lives on"],
-["nalthis","endowment","associated Shard"],
-["nalthis","breath","magic resource"],
-["breath","awakening","used by"],
-["nalthis","warbreaker","setting of"],
-["taldain","autonomy","associated Shard"],
-["taldain","white-sand","setting of"],
-["taldain","taldain-sand","features"],
-["first-sun","sixth-dusk","setting of"],
-["lumar","tress","setting of"],
-["canticle","investiture","associated with unusual local phenomena"],
-["threnody","investiture","associated with supernatural effects"],
-["komashi","cosmere","part of the wider universe"],
-["hoid","elantris-book","appears in"],
-["hoid","shallan","interacts with"],
-["hoid","kaladin","interacts with"],
-["hoid","tress","narrative connection"],
-["khriss","investiture","studies"],
-["khriss","realmatic","documents and studies"],
-["silverlight","cognitive-realm","located in"],
-["seventeenth-shard","hoid","has pursued"],
+    <section class="stats">
+      <div class="stat">
+        <div class="stat-number" id="characterCount">0</div>
+        <div class="stat-label">Characters shown</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number" id="relationshipCount">0</div>
+        <div class="stat-label">Relationships shown</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">3</div>
+        <div class="stat-label">Books covered</div>
+      </div>
+    </section>
 
-["elend","vin","romantic relationship"],
-["elend","kelsier","joins the rebellion initiated by"],
-["marsh","kelsier","brothers"],
-["spook","kelsier","member of his crew"],
-["breeze","kelsier","member of his crew"],
-["ham","kelsier","member of his crew"],
-["clubs","kelsier","member of his crew"],
-["dockson","kelsier","helps organize the rebellion"],
-["tindwyl","elend","trains in leadership"],
-["tensoon","vin","becomes involved with"],
+    <section class="workspace">
+      <div class="graph-panel">
+        <div class="panel-heading">
+          <div>
+            <h3>Character relationship map</h3>
+            <div class="panel-subtitle">Select a node to inspect a character</div>
+          </div>
+        </div>
 
-["wax","wayne","partners and close friends"],
-["wax","marasi","works with"],
-["wayne","marasi","works with"],
-["wax","steris","marries"],
-["marasi","steris","half-sisters"],
-["melaan","marasi","works with"],
+        <div id="network" aria-label="Interactive character relationship graph"></div>
 
-["adolin","dalinar","son of"],
-["renarin","dalinar","son of"],
-["jasnah","navani","daughter and mother"],
-["adolin","navani","son and mother"],
-["renarin","navani","son and mother"],
-["adolin","shallan","marries"],
-["szeth","knights-radiant","becomes a member of"],
-["renarin","knights-radiant","member of"],
-["jasnah","knights-radiant","member of"],
-["navani","dalinar","marries"],
-["heralds","knights-radiant","associated with their history"],
+        <div class="graph-footer">
+          <div class="legend-item">
+            <span class="legend-dot" style="background:#a51d2d"></span>
+            Main characters
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot" style="background:#64748b"></span>
+            Supporting characters
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot" style="background:#8b6ca8"></span>
+            Historical or supernatural figures
+          </div>
+          <span>Scroll to zoom · Drag to move</span>
+        </div>
+      </div>
 
-["mraize","ghostbloods","member of"],
-["iyatil","ghostbloods","member of"],
-["thaidakar","ghostbloods","leads"],
-["mraize","iyatil","reports to"],
-["iyatil","thaidakar","reports to"],
-["ghostbloods","roshar","operates on"],
-["ghostbloods","worldhoppers","has cross-world objectives"]
-];
+      <aside class="details-panel">
+        <div class="panel-heading">
+          <div>
+            <h3>Character profile</h3>
+            <div class="panel-subtitle">Details and connections</div>
+          </div>
+        </div>
+        <div id="details" class="details-content">
+          <div class="empty-state">
+            <div class="empty-icon">✦</div>
+            <h3>Choose a character</h3>
+            <p>
+              Select any character in the graph or directory to learn
+              about their role and connections throughout the trilogy.
+            </p>
+          </div>
+        </div>
+      </aside>
+    </section>
 
-const svg=document.getElementById("board");
-const world=document.getElementById("world");
-const NS="http://www.w3.org/2000/svg";
-let selected=null,scale=1,tx=0,ty=0,dragging=false,start=null,moved=false;
+    <section class="directory-panel">
+      <div class="panel-heading">
+        <div>
+          <h3>Character directory</h3>
+          <div class="panel-subtitle">Select any name to open their profile</div>
+        </div>
+        <div class="panel-subtitle" id="directoryCount"></div>
+      </div>
+      <div class="directory-content">
+        <div class="directory-grid" id="directory"></div>
+      </div>
+    </section>
 
-function el(tag,attrs={}){
-  const e=document.createElementNS(NS,tag);
-  Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));
-  return e;
-}
+    <p class="disclaimer">
+      This is a curated, expandable character dataset, not a verified
+      exhaustive index of every person mentioned in the books. Descriptions
+      and relationships contain spoilers for all three novels. Relationship
+      labels summarize important story connections rather than every
+      interaction. Historical figures, supernatural beings, and briefly
+      mentioned characters are included when relevant to the trilogy.
+    </p>
+  </main>
 
-function allowed(n){
-  const cutoff=document.getElementById("cutoff").value;
-  return cutoff==="all"||(books[n.book]??99)<=(books[cutoff]??99);
-}
+  <footer>
+    Research starting points:
+    <a href="https://coppermind.net/wiki/The_Final_Empire" target="_blank" rel="noopener noreferrer">The Final Empire</a>,
+    <a href="https://coppermind.net/wiki/The_Well_of_Ascension" target="_blank" rel="noopener noreferrer">The Well of Ascension</a>,
+    and
+    <a href="https://coppermind.net/wiki/The_Hero_of_Ages" target="_blank" rel="noopener noreferrer">The Hero of Ages</a>
+    on the Coppermind.
+    This is an unofficial fan project and is not affiliated with Brandon Sanderson.
+  </footer>
 
-function visibleNodes(){
-  const q=document.getElementById("search").value.trim().toLowerCase();
-  const series=document.getElementById("seriesFilter").value;
-  const type=document.getElementById("typeFilter").value;
-  return nodes.filter(n=>{
-    if(!allowed(n))return false;
-    if(series!=="all"&&n.series!==series)return false;
-    if(type!=="all"&&n.type!==type)return false;
-    if(q){
-      const searchable=[n.name,n.type,n.series,n.world,n.desc,...(n.tags||[])].join(" ").toLowerCase();
-      if(!searchable.includes(q))return false;
+  <script>
+    /*
+      BOOK KEY:
+      F = Mistborn: The Final Empire
+      W = The Well of Ascension
+      H = The Hero of Ages
+
+      CHARACTER DATA:
+      Add characters to the characters array.
+      Add connections to the relationships array.
+
+      Keep IDs unique. Every relationship must refer to an existing
+      character ID. Relationship descriptions should be spoiler-aware.
+    */
+
+    const characters = [
+      {
+        id: "vin",
+        name: "Vin",
+        role: "Mistborn · Central protagonist",
+        books: ["F", "W", "H"],
+        type: "main",
+        description: "A streetwise skaa girl who becomes a powerful Mistborn. Kelsier recruits her into his crew, and she learns to navigate both the criminal underworld and noble society. Her relationship with Elend and her connection to the mists become central to the fate of the world."
+      },
+      {
+        id: "kelsier",
+        name: "Kelsier",
+        role: "Mistborn · The Survivor",
+        books: ["F", "W", "H"],
+        type: "main",
+        description: "A charismatic Mistborn and master thief who plans a rebellion against the Lord Ruler. After surviving the Pits of Hathsin, he becomes known as the Survivor. His ideals, legacy, and religious symbolism continue to influence people after his death."
+      },
+      {
+        id: "elend",
+        name: "Elend Venture",
+        role: "Nobleman · King and emperor",
+        books: ["F", "W", "H"],
+        type: "main",
+        description: "An idealistic nobleman who hopes to create a fairer society after the Lord Ruler's fall. He falls in love with Vin and takes on the difficult responsibility of ruling. He eventually becomes a Mistborn."
+      },
+      {
+        id: "sazed",
+        name: "Sazed",
+        role: "Terris Keeper",
+        books: ["F", "W", "H"],
+        type: "main",
+        description: "A Terris Keeper who preserves knowledge of many religions and cultures. He becomes a trusted ally of Kelsier's crew and a close friend to Vin and Elend. His struggle with faith after Tindwyl's death is crucial to the trilogy's conclusion."
+      },
+      {
+        id: "marsh",
+        name: "Marsh",
+        role: "Allomancer · Steel Inquisitor",
+        books: ["F", "W", "H"],
+        type: "main",
+        description: "Kelsier's older brother, initially an ally of the rebellion. He infiltrates the Steel Inquisitors but is eventually transformed into one of them. His story becomes entangled with Ruin's influence."
+      },
+      {
+        id: "spook",
+        name: "Spook",
+        role: "Tineye · Crew member",
+        books: ["F", "W", "H"],
+        type: "main",
+        description: "A young member of Kelsier's crew who speaks in a distinctive street dialect. His role grows considerably in The Hero of Ages, when he becomes involved in the uprising in Urteau and earns the title Survivor of the Flames."
+      },
+      {
+        id: "breeze",
+        name: "Breeze",
+        role: "Soother · Crew member",
+        books: ["F", "W", "H"],
+        type: "main",
+        description: "A refined and often cynical member of Kelsier's crew who uses emotional Allomancy to soothe other people's emotions. Beneath his sarcasm, he is a loyal friend and a skilled manipulator of social situations."
+      },
+      {
+        id: "ham",
+        name: "Hammond (Ham)",
+        role: "Thug · Soldier",
+        books: ["F", "W", "H"],
+        type: "main",
+        description: "A member of Kelsier's crew who burns pewter to enhance his physical abilities. He enjoys philosophical discussions and later serves as a military leader under Elend."
+      },
+      {
+        id: "clubs",
+        name: "Clubs",
+        role: "Smoker · Carpenter",
+        books: ["F", "W", "H"],
+        type: "main",
+        description: "A gruff carpenter and Misting who can burn copper to hide Allomantic activity. He helps Kelsier's crew and provides both practical skills and a place to operate."
+      },
+      {
+        id: "dockson",
+        name: "Dockson",
+        role: "Organizer · Crew member",
+        books: ["F", "W", "H"],
+        type: "main",
+        description: "Kelsier's trusted organizer and planner. He handles the practical logistics of the crew's operations and carries personal reasons for opposing the Final Empire."
+      },
+      {
+        id: "oreseur",
+        name: "OreSeur",
+        role: "Kandra",
+        books: ["F", "W", "H"],
+        type: "supporting",
+        description: "A kandra contracted to Kelsier and later Vin. His service to Vin becomes complicated by a dangerous impersonation scheme involving TenSoon."
+      },
+      {
+        id: "tensoon",
+        name: "TenSoon",
+        role: "Kandra · Third Generation",
+        books: ["W", "H"],
+        type: "supporting",
+        description: "A kandra who is ordered to impersonate OreSeur and spy on Vin. Over time, he develops a complicated connection with her and becomes important to the kandra's future."
+      },
+      {
+        id: "tindwyl",
+        name: "Tindwyl",
+        role: "Terris Keeper · Historian",
+        books: ["W", "H"],
+        type: "supporting",
+        description: "A Keeper specializing in leadership and historical knowledge. She is brought in to help Elend become a more effective ruler and develops a close relationship with Sazed."
+      },
+      {
+        id: "zane",
+        name: "Zane Venture",
+        role: "Mistborn · Assassin",
+        books: ["W", "H"],
+        type: "supporting",
+        description: "A troubled Mistborn who is sent against Vin. He is Straff Venture's son and Elend's half-brother. His encounters with Vin reveal his isolation and instability."
+      },
+      {
+        id: "straff",
+        name: "Straff Venture",
+        role: "Nobleman · King",
+        books: ["F", "W", "H"],
+        type: "supporting",
+        description: "Elend's father and a powerful noble leader. He commands one of the armies besieging Luthadel and is willing to use manipulation, including his son Zane, to secure power."
+      },
+      {
+        id: "cett",
+        name: "Ashweather Cett",
+        role: "Nobleman · King",
+        books: ["W", "H"],
+        type: "supporting",
+        description: "A regional ruler who brings an army to Luthadel during the succession crisis. His shifting political interests make him an important figure in the struggle to establish a new government."
+      },
+      {
+        id: "allrianne",
+        name: "Allrianne Cett",
+        role: "Noblewoman",
+        books: ["W", "H"],
+        type: "supporting",
+        description: "Ashweather Cett's daughter. She becomes romantically involved with Breeze, despite their contrasting personalities and social backgrounds."
+      },
+      {
+        id: "yomen",
+        name: "Aradan Yomen",
+        role: "Ruler of Fadrex",
+        books: ["H"],
+        type: "supporting",
+        description: "The ruler of Fadrex City who remains loyal to the old order. He is a capable political opponent of Elend and becomes involved in Vin's capture."
+      },
+      {
+        id: "quellion",
+        name: "Quellion",
+        role: "The Citizen",
+        books: ["H"],
+        type: "supporting",
+        description: "A revolutionary leader who takes control of Urteau after the Lord Ruler's death. His brutal methods and rigid ideology make him an antagonist in Spook's storyline."
+      },
+      {
+        id: "beldre",
+        name: "Beldre",
+        role: "Urteau noblewoman",
+        books: ["H"],
+        type: "supporting",
+        description: "Quellion's sister. She becomes involved in Spook's efforts to resist the Citizen's oppressive rule."
+      },
+      {
+        id: "demoux",
+        name: "Demoux",
+        role: "Soldier · Survivor's follower",
+        books: ["F", "W", "H"],
+        type: "supporting",
+        description: "A soldier who fought alongside Kelsier and later serves in Elend's forces. His experiences connect the original rebellion with the struggles of the new empire."
+      },
+      {
+        id: "yeden",
+        name: "Yeden",
+        role: "Skaa rebellion leader",
+        books: ["F", "W", "H"],
+        type: "supporting",
+        description: "A leader of the skaa rebellion who works with Kelsier to organize resistance against the Final Empire."
+      },
+      {
+        id: "reen",
+        name: "Reen",
+        role: "Vin's brother",
+        books: ["F", "W", "H"],
+        type: "supporting",
+        description: "Vin's older brother, who taught her to survive on the streets. His harsh lessons and remembered voice influence Vin long after their separation."
+      },
+      {
+        id: "mare",
+        name: "Mare",
+        role: "Kelsier's wife",
+        books: ["F", "W", "H"],
+        type: "supporting",
+        description: "Kelsier's wife, whose death in the Pits of Hathsin profoundly shapes his hatred of the Final Empire and his determination to inspire hope."
+      },
+      {
+        id: "rashek",
+        name: "Rashek (the Lord Ruler)",
+        role: "Former ruler of the Final Empire",
+        books: ["F", "W", "H"],
+        type: "historical",
+        description: "The immortal tyrant who ruled the Final Empire for a thousand years. Originally a Terrisman, he used the power of the Well of Ascension to reshape the world and establish his empire."
+      },
+      {
+        id: "alendi",
+        name: "Alendi",
+        role: "Historical figure · Worldbringer",
+        books: ["F", "W", "H"],
+        type: "historical",
+        description: "A historical figure whose journey and writings are central to the Terris Prophecies. His account of the Deepness helps Vin and others understand the world's history."
+      },
+      {
+        id: "kwaan",
+        name: "Kwaan",
+        role: "Historical Terris Worldbringer",
+        books: ["W", "H"],
+        type: "historical",
+        description: "A Terris scholar whose inscription and historical knowledge become vital to understanding the corrupted prophecy surrounding the Hero of Ages."
+      },
+      {
+        id: "ruin",
+        name: "Ruin",
+        role: "Shard · Antagonistic force",
+        books: ["F", "W", "H"],
+        type: "historical",
+        description: "A powerful Shardic entity whose influence threatens to destroy the world. Ruin manipulates information and people in an effort to escape confinement and bring about destruction."
+      },
+      {
+        id: "preservation",
+        name: "Preservation",
+        role: "Shard · The Mist Spirit's source",
+        books: ["F", "W", "H"],
+        type: "historical",
+        description: "The opposing force to Ruin, whose actions and sacrifice are central to the world's survival. Preservation's remaining power manifests through the mists and influences Vin's journey."
+      },
+      {
+        id: "human",
+        name: "Human",
+        role: "Koloss",
+        books: ["H"],
+        type: "supporting",
+        description: "A koloss who can speak with Vin and offers insight into the nature and origins of the koloss."
+      },
+      {
+        id: "ferson",
+        name: "Ferson Penrod",
+        role: "Nobleman · Political leader",
+        books: ["F", "W", "H"],
+        type: "supporting",
+        description: "A noble political figure who becomes involved in the changing power structure following the Lord Ruler's fall."
+      },
+      {
+        id: "goradel",
+        name: "Captain Goradel",
+        role: "Military officer",
+        books: ["F", "W", "H"],
+        type: "supporting",
+        description: "A military officer who serves in the changing political and military landscape after the fall of the Final Empire."
+      },
+      {
+        id: "jastes",
+        name: "Jastes Lekal",
+        role: "Nobleman",
+        books: ["F", "W", "H"],
+        type: "supporting",
+        description: "A nobleman connected to Elend's early social circle and the political tensions surrounding the fall of the Final Empire."
+      },
+      {
+        id: "trendalan",
+        name: "Trendalan",
+        role: "Nobleman",
+        books: ["F", "W", "H"],
+        type: "supporting",
+        description: "A nobleman associated with the social and political circles of the Final Empire."
+      },
+      {
+        id: "camon",
+        name: "Camon",
+        role: "Criminal crew leader",
+        books: ["F", "W", "H"],
+        type: "supporting",
+        description: "A criminal who employs Vin before she is recruited by Kelsier. His treatment of Vin helps establish her early circumstances and survival instincts."
+      },
+      {
+        id: "slowswift",
+        name: "Slowswift",
+        role: "Nobleman · Storyteller",
+        books: ["F", "W", "H"],
+        type: "supporting",
+        description: "A nobleman known for his stories and connection to the social circles of the Final Empire."
+      },
+      {
+        id: "noorden",
+        name: "Noorden",
+        role: "Skaa informant",
+        books: ["H"],
+        type: "supporting",
+        description: "A named character who appears in The Hero of Ages and is connected to the book's unfolding events."
+      },
+      {
+        id: "durn",
+        name: "Durn",
+        role: "Informant",
+        books: ["H"],
+        type: "supporting",
+        description: "An informant who assists Spook while he gathers intelligence in Urteau."
+      },
+      {
+        id: "gn eorndin".replace(" ", ""),
+        name: "Gneorndin Cett",
+        role: "Nobleman",
+        books: ["H"],
+        type: "supporting",
+        description: "A member of the Cett family who appears in the political and military events of The Hero of Ages."
+      },
+      {
+        id: "fatren",
+        name: "Fatren",
+        role: "Town leader",
+        books: ["H"],
+        type: "supporting",
+        description: "A man whose town is threatened by Ruin's forces. His encounter with Elend helps illustrate the devastation spreading across the empire."
+      },
+      {
+        id: "druffel",
+        name: "Druffel",
+        role: "Townsperson",
+        books: ["H"],
+        type: "supporting",
+        description: "A named character who appears in the early chapters of The Hero of Ages."
+      },
+      {
+        id: "sev",
+        name: "Sev",
+        role: "Townsperson",
+        books: ["H"],
+        type: "supporting",
+        description: "A named character who appears in the early chapters of The Hero of Ages."
+      },
+      {
+        id: "kanpaar",
+        name: "KanPaar",
+        role: "Kandra",
+        books: ["H"],
+        type: "supporting",
+        description: "A kandra elder whose actions become significant during the crisis among the kandra in The Hero of Ages."
+      },
+      {
+        id: "haddek",
+        name: "Haddek",
+        role: "Kandra",
+        books: ["H"],
+        type: "supporting",
+        description: "A kandra who appears during the events involving the kandra homeland and the Resolution."
+      },
+      {
+        id: "garv",
+        name: "Garv",
+        role: "Terris refugee",
+        books: ["H"],
+        type: "supporting",
+        description: "A named character mentioned among the people involved in the events of The Hero of Ages."
+      },
+      {
+        id: "harathdal",
+        name: "Harathdal",
+        role: "Terris refugee",
+        books: ["H"],
+        type: "supporting",
+        description: "A named character appearing in the later events of The Hero of Ages."
+      },
+      {
+        id: "dedri",
+        name: "Dedri Vasting",
+        role: "Named character",
+        books: ["H"],
+        type: "supporting",
+        description: "A named character appearing in The Hero of Ages."
+      },
+      {
+        id: "aslydin",
+        name: "Aslydin",
+        role: "Named character",
+        books: ["H"],
+        type: "supporting",
+        description: "A named character appearing in The Hero of Ages."
+      },
+      {
+        id: "vedlew",
+        name: "Vedlew",
+        role: "Terris elder",
+        books: ["H"],
+        type: "supporting",
+        description: "A Terris elder encountered by Sazed as he visits the Terris people."
+      },
+      {
+        id: "bennitson",
+        name: "Bennitson",
+        role: "Named character",
+        books: ["H"],
+        type: "supporting",
+        description: "A named character mentioned during the events of The Hero of Ages."
+      },
+      {
+        id: "trentison",
+        name: "Trentison",
+        role: "Named character",
+        books: ["H"],
+        type: "supporting",
+        description: "A named character mentioned during the events of The Hero of Ages."
+      },
+      {
+        id: "durn",
+        name: "Durn",
+        role: "Informant",
+        books: ["H"],
+        type: "supporting",
+        description: "An informant who helps Spook gather intelligence in Urteau."
+      },
+      {
+        id: "belvedere",
+        name: "Beldre's associate",
+        role: "Unspecified supporting character",
+        books: ["H"],
+        type: "supporting",
+        description: "Placeholder removed from the intended roster; use named character records for additions."
+      }
+    ];
+
+    /*
+      Relationships are undirected. Each edge connects two character IDs.
+      type controls the relationship filter.
+    */
+
+    const relationships = [
+      ["vin", "kelsier", "mentor", "crew"],
+      ["vin", "elend", "romantic partners", "romance"],
+      ["vin", "sazed", "close friends", "ally"],
+      ["vin", "marsh", "recruiter and ally", "ally"],
+      ["vin", "spook", "crew associates", "crew"],
+      ["vin", "breeze", "crew associates", "crew"],
+      ["vin", "ham", "crew associates", "crew"],
+      ["vin", "clubs", "crew associates", "crew"],
+      ["vin", "dockson", "crew associates", "crew"],
+      ["vin", "oreseur", "kandra servant", "other"],
+      ["vin", "tensoon", "kandra ally", "ally"],
+      ["vin", "reen", "siblings", "family"],
+      ["vin", "rashek", "opponents", "enemy"],
+      ["vin", "zane", "rivals and adversaries", "enemy"],
+      ["vin", "mare", "connected through Kelsier", "other"],
+      ["vin", "ruin", "opponents", "enemy"],
+      ["vin", "preservation", "connected to the mists", "other"],
+      ["vin", "yomen", "political opponents", "enemy"],
+      ["vin", "quellion", "opponents", "enemy"],
+      ["kelsier", "marsh", "brothers", "family"],
+      ["kelsier", "dockson", "crew associates", "crew"],
+      ["kelsier", "breeze", "crew associates", "crew"],
+      ["kelsier", "ham", "crew associates", "crew"],
+      ["kelsier", "clubs", "crew associates", "crew"],
+      ["kelsier", "spook", "crew associates", "crew"],
+      ["kelsier", "yeden", "rebellion allies", "ally"],
+      ["kelsier", "mare", "husband and wife", "romance"],
+      ["kelsier", "rashek", "rebellion against the Lord Ruler", "enemy"],
+      ["kelsier", "preservation", "connected to the Survivor's legacy", "other"],
+      ["elend", "straff", "father and son", "family"],
+      ["elend", "zane", "half-brothers", "family"],
+      ["elend", "sazed", "trusted allies", "ally"],
+      ["elend", "ham", "military allies", "ally"],
+      ["elend", "breeze", "political and military allies", "ally"],
+      ["elend", "allrianne", "connected through Breeze", "other"],
+      ["elend", "cett", "political allies and rivals", "other"],
+      ["elend", "yomen", "political opponents", "enemy"],
+      ["elend", "rashek", "successor and opponent", "enemy"],
+      ["elend", "ruin", "opponents", "enemy"],
+      ["sazed", "tindwyl", "romantic partners", "romance"],
+      ["sazed", "tensoon", "allies during the crisis", "ally"],
+      ["sazed", "kwaan", "connected through Terris history", "other"],
+      ["sazed", "alendi", "connected through the prophecies", "other"],
+      ["sazed", "ruin", "opposing forces", "enemy"],
+      ["sazed", "preservation", "connected to the world's fate", "other"],
+      ["marsh", "ruin", "manipulated by Ruin", "enemy"],
+      ["marsh", "rashek", "Steel Inquisitor legacy", "other"],
+      ["spook", "clubs", "crew associates", "crew"],
+      ["spook", "quellion", "resistance against the Citizen", "enemy"],
+      ["spook", "beldre", "allies against the Citizen", "ally"],
+      ["spook", "kelsier", "influenced by the Survivor", "other"],
+      ["breeze", "allrianne", "romantic partners", "romance"],
+      ["breeze", "ham", "crew associates", "crew"],
+      ["breeze", "cett", "connected through Allrianne", "family"],
+      ["tensoon", "oreseur", "kandra identities and service", "other"],
+      ["tensoon", "kanpaar", "kandra community", "other"],
+      ["tensoon", "haddek", "kandra community", "other"],
+      ["straff", "zane", "father and son", "family"],
+      ["straff", "cett", "rivals in the succession crisis", "enemy"],
+      ["cett", "allrianne", "father and daughter", "family"],
+      ["quellion", "beldre", "siblings", "family"],
+      ["rashek", "alendi", "historical opposition", "enemy"],
+      ["kwaan", "alendi", "connected through Terris history", "other"],
+      ["ruin", "preservation", "opposing Shards", "enemy"],
+      ["human", "vin", "communicates with Vin", "other"],
+      ["ferson", "elend", "political connection", "other"],
+      ["goradel", "sazed", "military associates", "ally"],
+      ["jastes", "elend", "noble social circle", "other"],
+      ["camon", "vin", "former employer", "other"],
+      ["noorden", "vin", "connected through events in Fadrex", "other"],
+      ["durn", "spook", "informant and ally", "ally"],
+      ["fatren", "elend", "receives help from Elend", "ally"],
+      ["vedlew", "sazed", "Terris elders and Keeper", "other"],
+      ["kanpaar", "ruin", "caught up in Ruin's plans", "other"]
+    ];
+
+    // Remove duplicate character IDs and placeholder records.
+    const characterMap = new Map();
+    characters.forEach(character => {
+      if (character.id !== "belvedere") {
+        characterMap.set(character.id, character);
+      }
+    });
+
+    // If the same character was entered twice, keep the first record.
+    // This prevents duplicate directory entries.
+    const allCharacters = [...characterMap.values()];
+
+    const bookNames = {
+      F: "The Final Empire",
+      W: "The Well of Ascension",
+      H: "The Hero of Ages"
+    };
+
+    const typeColors = {
+      main: "#a51d2d",
+      supporting: "#64748b",
+      historical: "#8b6ca8"
+    };
+
+    const relationColors = {
+      family: "#bd7654",
+      romance: "#c34e7a",
+      ally: "#6a9a78",
+      enemy: "#b83b3b",
+      crew: "#6d88b8",
+      other: "#92949b"
+    };
+
+    const searchInput = document.getElementById("search");
+    const bookFilter = document.getElementById("bookFilter");
+    const relationFilter = document.getElementById("relationFilter");
+    const directory = document.getElementById("directory");
+    const details = document.getElementById("details");
+    const networkContainer = document.getElementById("network");
+
+    let selectedCharacterId = null;
+
+    const graphNodes = new vis.DataSet([]);
+    const graphEdges = new vis.DataSet([]);
+
+    const network = new vis.Network(
+      networkContainer,
+      {
+        nodes: graphNodes,
+        edges: graphEdges
+      },
+      {
+        autoResize: true,
+        interaction: {
+          hover: true,
+          navigationButtons: true,
+          keyboard: { enabled: true },
+          multiselect: false
+        },
+        physics: {
+          enabled: true,
+          stabilization: {
+            enabled: true,
+            iterations: 180,
+            updateInterval: 25
+          },
+          barnesHut: {
+            gravitationalConstant: -4200,
+            centralGravity: 0.25,
+            springLength: 155,
+            springConstant: 0.035,
+            damping: 0.12,
+            avoidOverlap: 0.25
+          }
+        },
+        nodes: {
+          shape: "dot",
+          size: 17,
+          borderWidth: 2,
+          borderWidthSelected: 4,
+          font: {
+            face: "Inter, Arial, sans-serif",
+            size: 13,
+            color: "#252525",
+            strokeWidth: 4,
+            strokeColor: "#ffffff",
+            vadjust: 5
+          },
+          chosen: {
+            node: function(values) {
+              values.borderColor = "#a51d2d";
+              values.borderWidth = 4;
+              values.size = 22;
+            }
+          }
+        },
+        edges: {
+          width: 1.5,
+          selectionWidth: 3,
+          smooth: {
+            enabled: true,
+            type: "continuous",
+            roundness: 0.2
+          },
+          color: {
+            color: "#d1d3d8",
+            highlight: "#a51d2d",
+            hover: "#a51d2d",
+            inherit: false
+          },
+          font: {
+            size: 9,
+            face: "Inter, Arial, sans-serif",
+            color: "#70757d",
+            strokeWidth: 3,
+            strokeColor: "#ffffff",
+            align: "middle"
+          }
+        }
+      }
+    );
+
+    function safeText(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      })[char]);
     }
-    return true;
-  });
-}
 
-function nodeShape(n){
-  if(n.type==="event")return el("rect",{x:-7,y:-7,width:14,height:14,rx:2});
-  if(n.type==="world")return el("polygon",{points:"0,-10 10,0 0,10 -10,0"});
-  if(n.type==="concept")return el("polygon",{points:"-9,-6 0,-11 9,-6 9,6 0,11 -9,6"});
-  if(n.type==="shard")return el("rect",{x:-8,y:-8,width:16,height:16,rx:0});
-  if(n.type==="magic")return el("circle",{r:9,"stroke-dasharray":"3 2"});
-  return el("circle",{r:8});
-}
+    function characterById(id) {
+      return characterMap.get(id);
+    }
 
-function draw(){
-  world.replaceChildren();
-  const visible=visibleNodes(),ids=new Set(visible.map(n=>n.id));
-  const edges=el("g"),pins=el("g");
-  world.append(edges,pins);
+    function characterBookNames(character) {
+      return character.books.map(key => bookNames[key]).join(", ");
+    }
 
-  links.forEach(([a,b,label])=>{
-    if(!ids.has(a)||!ids.has(b))return;
-    const A=nodes.find(n=>n.id===a),B=nodes.find(n=>n.id===b);
-    if(!A||!B)return;
-    const hot=selected&&(selected===a||selected===b);
-    edges.append(el("line",{
-      x1:A.x,y1:A.y,x2:B.x,y2:B.y,
-      stroke:"#f5f5f5",
-      "stroke-width":hot?1.8:1.1,
-      opacity:hot?".95":".27"
-    }));
-    if(hot){
-      const t=el("text",{
-        x:(A.x+B.x)/2,y:(A.y+B.y)/2-6,
-        fill:"#aaa","font-size":10,"text-anchor":"middle",
-        "paint-order":"stroke",stroke:"#050505","stroke-width":3
+    function bookTags(character) {
+      return character.books.map(key =>
+        `<span class="book-tag ${key.toLowerCase()}">${safeText(bookNames[key])}</span>`
+      ).join("");
+    }
+
+    function currentSearch() {
+      return searchInput.value.trim().toLowerCase();
+    }
+
+    function matchesBook(character) {
+      const selectedBook = bookFilter.value;
+      return selectedBook === "all" || character.books.includes(selectedBook);
+    }
+
+    function matchesSearch(character) {
+      const query = currentSearch();
+      if (!query) return true;
+
+      return [
+        character.name,
+        character.role,
+        character.description
+      ].some(value => value.toLowerCase().includes(query));
+    }
+
+    function filteredCharacters() {
+      return allCharacters.filter(character =>
+        matchesBook(character) && matchesSearch(character)
+      );
+    }
+
+    function validRelationships(visibleIds) {
+      const relationType = relationFilter.value;
+
+      return relationships.filter(([from, to, label, type]) => {
+        if (!visibleIds.has(from) || !visibleIds.has(to)) return false;
+        if (relationType !== "all" && relationType !== type) return false;
+
+        // When filtering by book, show a relationship only if both
+        // characters appear in that selected book.
+        if (bookFilter.value !== "all") {
+          const a = characterById(from);
+          const b = characterById(to);
+          if (!a || !b) return false;
+          if (!a.books.includes(bookFilter.value) ||
+              !b.books.includes(bookFilter.value)) return false;
+        }
+
+        return true;
       });
-      t.textContent=label;
-      edges.append(t);
     }
-  });
 
-  visible.forEach(n=>{
-    const g=el("g",{
-      transform:`translate(${n.x} ${n.y})`,
-      tabindex:"0",role:"button","aria-label":n.name,
-      style:"cursor:pointer"
+    function updateGraph() {
+      const visibleCharacters = filteredCharacters();
+      const visibleIds = new Set(visibleCharacters.map(c => c.id));
+      const visibleRelationships = validRelationships(visibleIds);
+
+      const nodes = visibleCharacters.map(character => ({
+        id: character.id,
+        label: character.name,
+        title: `${character.name}\n${character.role}`,
+        color: {
+          background: typeColors[character.type] || typeColors.supporting,
+          border: typeColors[character.type] || typeColors.supporting,
+          highlight: {
+            background: "#f2cdd2",
+            border: "#a51d2d"
+          },
+          hover: {
+            background: "#f2cdd2",
+            border: "#a51d2d"
+          }
+        },
+        shape: "dot",
+        size: character.type === "main" ? 22 : character.type === "historical" ? 15 : 17,
+        font: {
+          size: character.type === "main" ? 14 : 11,
+          face: "Inter, Arial, sans-serif",
+          color: "#252525",
+          strokeWidth: 4,
+          strokeColor: "#ffffff"
+        }
+      }));
+
+      const edges = visibleRelationships.map((relationship, index) => {
+        const [from, to, label, type] = relationship;
+        return {
+          id: `edge-${index}-${from}-${to}`,
+          from,
+          to,
+          label,
+          title: label,
+          color: {
+            color: relationColors[type] || relationColors.other,
+            highlight: "#a51d2d",
+            hover: "#a51d2d",
+            inherit: false
+          },
+          width: type === "family" || type === "romance" ? 2.3 : 1.4
+        };
+      });
+
+      graphNodes.clear();
+      graphEdges.clear();
+      graphNodes.add(nodes);
+      graphEdges.add(edges);
+
+      document.getElementById("characterCount").textContent = nodes.length;
+      document.getElementById("relationshipCount").textContent = edges.length;
+
+      renderDirectory(visibleCharacters);
+
+      if (selectedCharacterId && visibleIds.has(selectedCharacterId)) {
+        showCharacter(selectedCharacterId, false);
+      } else if (selectedCharacterId) {
+        selectedCharacterId = null;
+        showEmptyState();
+      }
+
+      if (nodes.length > 0) {
+        network.stabilize(80);
+      }
+    }
+
+    function renderDirectory(list) {
+      document.getElementById("directoryCount").textContent =
+        `${list.length} character${list.length === 1 ? "" : "s"}`;
+
+      if (!list.length) {
+        directory.innerHTML =
+          '<div class="no-results">No characters match your search or filters.</div>';
+        return;
+      }
+
+      directory.innerHTML = list
+        .slice()
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map(character => `
+          <button class="directory-card" data-character-id="${safeText(character.id)}">
+            <strong>${safeText(character.name)}</strong>
+            <span>${safeText(character.role)}</span>
+          </button>
+        `).join("");
+
+      directory.querySelectorAll("[data-character-id]").forEach(button => {
+        button.addEventListener("click", () => {
+          selectCharacter(button.dataset.characterId);
+        });
+      });
+    }
+
+    function showEmptyState() {
+      details.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">✦</div>
+          <h3>Choose a character</h3>
+          <p>
+            Select any character in the graph or directory to learn
+            about their role and connections throughout the trilogy.
+          </p>
+        </div>
+      `;
+    }
+
+    function showCharacter(id, moveGraph = true) {
+      const character = characterById(id);
+      if (!character) return;
+
+      selectedCharacterId = id;
+
+      const related = relationships
+        .filter(([from, to]) => from === id || to === id)
+        .map(([from, to, label, type]) => {
+          const otherId = from === id ? to : from;
+          return {
+            character: characterById(otherId),
+            label,
+            type
+          };
+        })
+        .filter(item => item.character)
+        .sort((a, b) => a.character.name.localeCompare(b.character.name));
+
+      const visibleIds = new Set(filteredCharacters().map(c => c.id));
+      const shownRelated = related.filter(item => visibleIds.has(item.character.id));
+
+      details.innerHTML = `
+        <h2 class="character-name">${safeText(character.name)}</h2>
+        <div style="font-size:12px;color:var(--muted);line-height:1.6;">
+          ${safeText(character.role)}
+        </div>
+
+        <div class="section-label">Appears in</div>
+        <div class="book-tags">${bookTags(character)}</div>
+
+        <p class="character-description">${safeText(character.description)}</p>
+
+        <div class="section-label">Character connections (${shownRelated.length})</div>
+        <div class="connection-list">
+          ${shownRelated.length ? shownRelated.map(item => `
+            <button class="connection-button" data-related-id="${safeText(item.character.id)}">
+              <span>
+                <span class="connection-name">${safeText(item.character.name)}</span>
+                <span class="connection-type">${safeText(item.label)}</span>
+              </span>
+              <span class="arrow">›</span>
+            </button>
+          `).join("") : `
+            <div style="font-size:12px;line-height:1.7;color:var(--muted);">
+              No connected characters are currently visible under these filters.
+            </div>
+          `}
+        </div>
+      `;
+
+      details.querySelectorAll("[data-related-id]").forEach(button => {
+        button.addEventListener("click", () => {
+          selectCharacter(button.dataset.relatedId);
+        });
+      });
+
+      if (moveGraph && graphNodes.get(id)) {
+        network.selectNodes([id]);
+        network.focus(id, {
+          scale: Math.max(network.getScale(), 0.85),
+          animation: {
+            duration: 350,
+            easingFunction: "easeInOutQuad"
+          }
+        });
+      }
+    }
+
+    function selectCharacter(id) {
+      if (!graphNodes.get(id)) {
+        // The character may be hidden by current filters.
+        const character = characterById(id);
+        if (!character) return;
+
+        searchInput.value = "";
+        bookFilter.value = "all";
+        relationFilter.value = "all";
+        updateGraph();
+      }
+
+      showCharacter(id, true);
+      network.selectNodes([id]);
+    }
+
+    network.on("selectNode", function(params) {
+      if (params.nodes.length) {
+        showCharacter(params.nodes[0], false);
+      }
     });
-    const shape=nodeShape(n);
-    shape.setAttribute("fill",selected===n.id?"#fff":"#050505");
-    shape.setAttribute("stroke","#fff");
-    shape.setAttribute("stroke-width",selected===n.id?"2.5":"1.4");
-    g.append(shape);
-    if(selected===n.id)g.append(el("circle",{r:16,fill:"none",stroke:"#fff","stroke-width":1,opacity:".8"}));
-    const label=el("text",{
-      x:0,y:25,fill:"#f4f4f4","font-size":12,
-      "font-weight":selected===n.id?700:500,
-      "text-anchor":"middle","paint-order":"stroke",
-      stroke:"#050505","stroke-width":4,"stroke-linejoin":"round"
+
+    network.on("deselectNode", function() {
+      selectedCharacterId = null;
+      showEmptyState();
     });
-    label.textContent=n.name;
-    g.append(label);
-    g.addEventListener("click",e=>{e.stopPropagation();if(!moved)selectNode(n.id)});
-    g.addEventListener("keydown",e=>{
-      if(e.key==="Enter"||e.key===" "){e.preventDefault();selectNode(n.id)}
+
+    searchInput.addEventListener("input", updateGraph);
+    bookFilter.addEventListener("change", updateGraph);
+    relationFilter.addEventListener("change", updateGraph);
+
+    document.getElementById("fitButton").addEventListener("click", () => {
+      network.fit({
+        animation: {
+          duration: 350,
+          easingFunction: "easeInOutQuad"
+        }
+      });
     });
-    g.addEventListener("pointerenter",()=>showTooltip(n));
-    g.addEventListener("pointerleave",hideTooltip);
-    pins.append(g);
-  });
 
-  document.getElementById("status").textContent=
-    `${visible.length} visible nodes · drag to pan · scroll or +/- to zoom`;
-  if(selected&&!ids.has(selected)){selected=null;renderDetail(null)}
-}
+    document.getElementById("resetButton").addEventListener("click", () => {
+      searchInput.value = "";
+      bookFilter.value = "all";
+      relationFilter.value = "all";
+      selectedCharacterId = null;
+      updateGraph();
+      network.unselectAll();
+      showEmptyState();
+      network.fit({
+        animation: {
+          duration: 350,
+          easingFunction: "easeInOutQuad"
+        }
+      });
+    });
 
-function selectNode(id){
-  selected=id;
-  draw();
-  renderDetail(nodes.find(n=>n.id===id)||null);
-}
+    // Initial render.
+    updateGraph();
 
-function renderDetail(n){
-  const heading=document.getElementById("detailHeading");
-  const intro=document.getElementById("detailIntro");
-  const detail=document.getElementById("detail");
-  detail.replaceChildren();
-  if(!n){
-    heading.textContent="The board";
-    intro.textContent="Explore the Cosmere through worlds, characters, Shards, magic systems, and cross-series connections.";
-    return;
-  }
-
-  heading.textContent=n.name;
-  intro.textContent="Selected node";
-  const card=document.createElement("div");
-  card.className="card";
-
-  const eye=document.createElement("div");
-  eye.className="eyebrow";
-  eye.textContent=`${n.type} · ${n.series}`;
-  card.append(eye);
-
-  const title=document.createElement("h3");
-  title.textContent=n.name;
-  card.append(title);
-
-  const desc=document.createElement("p");
-  desc.textContent=n.desc;
-  card.append(desc);
-
-  [n.world,...(n.tags||[])].filter(Boolean).forEach(tag=>{
-    const p=document.createElement("span");
-    p.className="pill";
-    p.textContent=tag;
-    card.append(p);
-  });
-
-  const bookNames={
-    elantris:"Elantris / early Cosmere",
-    mistborn1:"The Final Empire",
-    mistborn3:"The Hero of Ages",
-    mistborn4:"The Lost Metal",
-    warbreaker:"Warbreaker",
-    stormlight1:"The Way of Kings",
-    stormlight2:"Words of Radiance",
-    stormlight3:"Oathbringer",
-    stormlight4:"Rhythm of War",
-    stormlight5:"Wind and Truth",
-    secret:"Secret Projects"
-  };
-  const level=document.createElement("p");
-  level.textContent=`Spoiler threshold: ${bookNames[n.book]||"Unspecified"} (approximate)`;
-  card.append(level);
-
-  const source=document.createElement("p");
-  source.style.fontSize="11px";
-  const a=document.createElement("a");
-  a.href="https://coppermind.net/wiki/"+encodeURIComponent(n.name.replaceAll(" ","_"));
-  a.target="_blank";
-  a.rel="noopener";
-  a.style.color="#ddd";
-  a.textContent="Search Coppermind for this topic ↗";
-  source.append("Reference starting point: ",a);
-  card.append(source);
-  detail.append(card);
-
-  const relTitle=document.createElement("p");
-  relTitle.textContent="Connected nodes";
-  relTitle.style.color="#aaa";
-  detail.append(relTitle);
-
-  const rel=document.createElement("div");
-  rel.className="related";
-  const ids=new Set(links.filter(l=>l[0]===n.id||l[1]===n.id).map(l=>l[0]===n.id?l[1]:l[0]));
-  [...ids].forEach(id=>{
-    const target=nodes.find(x=>x.id===id);
-    if(!target||!allowed(target))return;
-    const b=document.createElement("button");
-    b.textContent=target.name;
-    b.addEventListener("click",()=>selectNode(id));
-    rel.append(b);
-  });
-  if(!rel.children.length){
-    const p=document.createElement("span");
-    p.className="empty";
-    p.textContent="No connected nodes visible under this spoiler cutoff.";
-    rel.append(p);
-  }
-  detail.append(rel);
-}
-
-function showTooltip(n){
-  const t=document.getElementById("tooltip");
-  t.textContent=`${n.name} · ${n.type}`;
-  t.style.display="block";
-  t.style.left="16px";
-  t.style.top="16px";
-}
-function hideTooltip(){document.getElementById("tooltip").style.display="none"}
-function applyTransform(){world.setAttribute("transform",`translate(${tx} ${ty}) scale(${scale})`)}
-
-function zoomBy(factor){
-  const old=scale,next=Math.max(.28,Math.min(3,old*factor)),ratio=next/old;
-  const cx=750,cy=525;
-  tx=cx-(cx-tx)*ratio;
-  ty=cy-(cy-ty)*ratio;
-  scale=next;
-  applyTransform();
-}
-
-function fitBoard(){
-  const bounds=world.getBBox();
-  if(!bounds.width||!bounds.height)return;
-  const padding=90,vw=1500,vh=1050;
-  scale=Math.max(.28,Math.min(1.2,(vw-padding*2)/bounds.width,(vh-padding*2)/bounds.height));
-  tx=vw/2-(bounds.x+bounds.width/2)*scale;
-  ty=vh/2-(bounds.y+bounds.height/2)*scale;
-  applyTransform();
-}
-
-function reset(){
-  scale=1;tx=0;ty=0;selected=null;
-  applyTransform();
-  renderDetail(null);
-  draw();
-}
-
-document.getElementById("zoomIn").addEventListener("click",()=>zoomBy(1.2));
-document.getElementById("zoomOut").addEventListener("click",()=>zoomBy(1/1.2));
-document.getElementById("fitBoard").addEventListener("click",fitBoard);
-document.getElementById("reset").addEventListener("click",reset);
-
-svg.addEventListener("pointerdown",e=>{
-  if(e.target.closest('g[role="button"]'))return;
-  dragging=true;moved=false;start={x:e.clientX,y:e.clientY,tx,ty};
-  svg.classList.add("dragging");
-  svg.setPointerCapture(e.pointerId);
-});
-svg.addEventListener("pointermove",e=>{
-  if(!dragging||!start)return;
-  const rect=svg.getBoundingClientRect(),vb=svg.viewBox.baseVal;
-  const dx=(e.clientX-start.x)*vb.width/rect.width;
-  const dy=(e.clientY-start.y)*vb.height/rect.height;
-  if(Math.abs(dx)+Math.abs(dy)>3)moved=true;
-  tx=start.tx+dx;
-  ty=start.ty+dy;
-  applyTransform();
-});
-function stopDrag(){dragging=false;start=null;svg.classList.remove("dragging")}
-svg.addEventListener("pointerup",stopDrag);
-svg.addEventListener("pointercancel",stopDrag);
-svg.addEventListener("wheel",e=>{
-  e.preventDefault();
-  zoomBy(e.deltaY<0?1.1:1/1.1);
-},{passive:false});
-
-document.getElementById("search").addEventListener("input",draw);
-document.getElementById("seriesFilter").addEventListener("change",draw);
-document.getElementById("typeFilter").addEventListener("change",draw);
-document.getElementById("cutoff").addEventListener("change",()=>{
-  draw();
-  if(selected)renderDetail(nodes.find(n=>n.id===selected)||null);
-});
-document.getElementById("showAll").addEventListener("click",()=>{
-  document.getElementById("search").value="";
-  document.getElementById("seriesFilter").value="all";
-  document.getElementById("typeFilter").value="all";
-  document.getElementById("cutoff").value="all";
-  selected=null;
-  renderDetail(null);
-  draw();
-});
-document.getElementById("downloadData").addEventListener("click",()=>{
-  const blob=new Blob([JSON.stringify({
-    nodes,links,
-    notice:"Cosmere reference graph. Verify character details and connections against the published books. Implied identities are not treated as confirmed."
-  },null,2)],{type:"application/json"});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url;
-  a.download="cosmere-connection-data.json";
-  a.click();
-  setTimeout(()=>URL.revokeObjectURL(url),1000);
-});
-
-const sf=document.getElementById("seriesFilter");
-[...new Set(nodes.map(n=>n.series))].sort().forEach(s=>{
-  const o=document.createElement("option");
-  o.value=s;
-  o.textContent=s;
-  sf.append(o);
-});
-
-draw();
-applyTransform();
-fitBoard();
-</script>
+    network.once("stabilizationIterationsDone", () => {
+      network.fit({
+        animation: {
+          duration: 300,
+          easingFunction: "easeInOutQuad"
+        }
+      });
+    });
+  </script>
 </body>
 </html>
