@@ -3,36 +3,42 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#a51d2d">
-  <title>Mistborn Character Connections</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090909">
+  <title>Mistborn | Character Connections</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
   <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
 
   <style>
     :root {
-      --red: #a51d2d;
-      --red-dark: #741321;
-      --red-light: #f8e8eb;
-      --background: #f7f7f8;
-      --panel: #ffffff;
-      --text: #202124;
-      --muted: #70757d;
-      --border: #e4e5e7;
-      --shadow: 0 4px 18px rgba(0, 0, 0, 0.055);
+      --bg: #090909;
+      --panel: #111111;
+      --panel2: #171717;
+      --panel3: #202020;
+      --border: #303030;
+      --text: #f5f5f5;
+      --muted: #a0a0a0;
+      --subtle: #777777;
+      --red: #c52a3d;
+      --red-hover: #e0394e;
+      --red-soft: #351318;
+      --white-line: #525252;
     }
 
     * {
       box-sizing: border-box;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       margin: 0;
-      background: var(--background);
+      background: var(--bg);
       color: var(--text);
       font-family: Inter, Arial, sans-serif;
       font-size: 14px;
@@ -46,15 +52,26 @@
       cursor: pointer;
     }
 
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible {
+      outline: 2px solid var(--red-hover);
+      outline-offset: 2px;
+    }
+
     .topbar {
-      background: #fff;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(9, 9, 9, .96);
+      backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
-      padding: 23px 30px;
     }
 
     .topbar-inner {
       max-width: 1600px;
       margin: 0 auto;
+      padding: 18px 28px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -64,476 +81,600 @@
     .brand {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 13px;
+      min-width: 0;
     }
 
     .brand-mark {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 46px;
-      height: 46px;
+      width: 44px;
+      height: 44px;
       flex-shrink: 0;
-      color: #fff;
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
       background: var(--red);
-      border-radius: 12px;
-      font-size: 25px;
+      color: #fff;
       font-weight: 800;
+      font-size: 23px;
     }
 
     h1 {
-      font-size: 23px;
-      letter-spacing: -0.8px;
       margin: 0 0 5px;
+      font-size: 21px;
       font-weight: 800;
+      letter-spacing: -.7px;
     }
 
     .subtitle {
       color: var(--muted);
-      font-size: 12px;
+      font-size: 11px;
     }
 
-    .spoiler-label {
-      color: var(--red);
-      background: var(--red-light);
+    .spoiler {
+      color: #ffbfc7;
+      border: 1px solid #57232b;
+      background: #241013;
       border-radius: 6px;
-      padding: 8px 11px;
-      font-size: 11px;
-      font-weight: 700;
+      padding: 8px 10px;
+      font-size: 10px;
+      font-weight: 800;
       white-space: nowrap;
+      letter-spacing: .3px;
     }
 
     .page {
       max-width: 1600px;
       margin: 0 auto;
-      padding: 24px 30px 36px;
+      padding: 25px 28px 35px;
     }
 
     .intro {
-      margin-bottom: 20px;
+      margin-bottom: 21px;
+    }
+
+    .eyebrow {
+      color: #ef6979;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1.7px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
     }
 
     .intro h2 {
-      margin: 0 0 7px;
-      font-size: 18px;
-      letter-spacing: -0.4px;
+      margin: 0 0 9px;
+      font-size: 24px;
+      letter-spacing: -.8px;
     }
 
     .intro p {
-      margin: 0;
+      max-width: 780px;
       color: var(--muted);
-      line-height: 1.65;
-      max-width: 800px;
-      font-size: 13px;
+      line-height: 1.7;
+      font-size: 12px;
+      margin: 0;
     }
 
     .toolbar {
       display: flex;
-      flex-wrap: wrap;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-bottom: 14px;
     }
 
     .search-wrap {
-      flex: 1 1 260px;
+      flex: 1 1 250px;
+      min-width: 0;
       position: relative;
+    }
+
+    .search-symbol {
+      position: absolute;
+      left: 13px;
+      top: 11px;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .search-wrap input,
+    .filter-select {
+      height: 40px;
+      background: var(--panel);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      outline: none;
     }
 
     .search-wrap input {
       width: 100%;
-      height: 42px;
-      padding: 0 14px 0 39px;
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      background: white;
-      outline: none;
+      padding: 0 13px 0 36px;
     }
 
-    .search-wrap input:focus {
+    .search-wrap input::placeholder {
+      color: var(--subtle);
+    }
+
+    .search-wrap input:focus,
+    .filter-select:focus {
       border-color: var(--red);
-      box-shadow: 0 0 0 3px rgba(165, 29, 45, 0.09);
-    }
-
-    .search-icon {
-      position: absolute;
-      left: 14px;
-      top: 12px;
-      color: var(--muted);
-      font-size: 15px;
     }
 
     .filter-select {
-      height: 42px;
-      min-width: 180px;
+      min-width: 155px;
+      padding: 0 10px;
+      font-size: 11px;
+    }
+
+    .filter-select option {
+      background: var(--panel);
+      color: var(--text);
+    }
+
+    .btn {
+      min-height: 40px;
       padding: 0 12px;
-      background: white;
+      background: var(--panel);
       border: 1px solid var(--border);
-      border-radius: 9px;
+      border-radius: 7px;
       color: var(--text);
-      outline: none;
+      font-size: 11px;
+      font-weight: 700;
+      transition: background .15s, border-color .15s;
     }
 
-    .action-button {
-      height: 42px;
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      background: white;
-      padding: 0 14px;
-      color: var(--text);
-      font-weight: 600;
-      font-size: 12px;
+    .btn:hover {
+      background: var(--panel3);
+      border-color: #666;
     }
 
-    .action-button:hover {
-      border-color: var(--red);
-      color: var(--red);
-    }
-
-    .action-button.primary {
-      color: white;
+    .btn.primary {
       background: var(--red);
       border-color: var(--red);
+      color: white;
     }
 
-    .action-button.primary:hover {
-      background: var(--red-dark);
+    .btn.primary:hover {
+      background: var(--red-hover);
+    }
+
+    .btn.active {
+      border-color: var(--red);
+      color: #ffbfc7;
+      background: var(--red-soft);
     }
 
     .stats {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 16px;
+      align-items: center;
+      gap: 18px;
+      padding: 0 1px 15px;
+      color: var(--muted);
+      font-size: 11px;
     }
 
     .stat {
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      padding: 11px 15px;
-      min-width: 130px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
     }
 
     .stat-number {
-      font-size: 21px;
+      color: white;
       font-weight: 800;
-      letter-spacing: -0.5px;
+      font-size: 13px;
     }
 
-    .stat-label {
-      color: var(--muted);
-      font-size: 11px;
-      margin-top: 4px;
+    .stat-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--red);
     }
 
     .workspace {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 330px;
-      gap: 16px;
+      grid-template-columns: minmax(0, 1fr) 315px;
+      gap: 13px;
       align-items: stretch;
     }
 
-    .graph-panel,
-    .details-panel,
-    .directory-panel {
+    .panel {
+      min-width: 0;
       background: var(--panel);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      box-shadow: var(--shadow);
+      border-radius: 10px;
       overflow: hidden;
     }
 
     .panel-heading {
-      min-height: 59px;
-      padding: 16px 19px;
+      padding: 15px 17px;
+      min-height: 58px;
       border-bottom: 1px solid var(--border);
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      gap: 12px;
+      justify-content: space-between;
+      gap: 10px;
     }
 
     .panel-heading h3 {
       margin: 0;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 800;
     }
 
-    .panel-subtitle {
-      color: var(--muted);
-      font-size: 11px;
+    .panel-caption {
       margin-top: 4px;
+      font-size: 10px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .view-indicator {
+      color: #ffbfc7;
+      background: var(--red-soft);
+      border: 1px solid #57232b;
+      border-radius: 5px;
+      padding: 6px 8px;
+      font-size: 9px;
+      font-weight: 800;
+      white-space: nowrap;
     }
 
     #network {
-      height: 640px;
+      height: 600px;
       width: 100%;
-      background-color: #fff;
-      background-image: radial-gradient(#e9e9eb 0.8px, transparent 0.8px);
-      background-size: 20px 20px;
+      background-color: #0c0c0c;
+      background-image: radial-gradient(#272727 .8px, transparent .8px);
+      background-size: 22px 22px;
     }
 
-    .graph-footer {
-      padding: 13px 17px;
-      border-top: 1px solid var(--border);
+    .graph-controls {
       display: flex;
       flex-wrap: wrap;
-      gap: 14px;
-      color: var(--muted);
-      font-size: 11px;
+      gap: 7px;
+      padding: 12px 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .graph-controls .btn {
+      min-height: 34px;
+      padding: 0 10px;
+      font-size: 10px;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
       align-items: center;
+      gap: 13px;
+      padding: 0 15px 13px;
+      color: var(--muted);
+      font-size: 10px;
     }
 
     .legend-item {
       display: flex;
       align-items: center;
-      gap: 7px;
+      gap: 6px;
     }
 
     .legend-dot {
-      width: 9px;
-      height: 9px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
     }
 
     .details-panel {
-      min-height: 640px;
+      min-height: 600px;
     }
 
     .details-content {
-      padding: 20px;
+      padding: 19px;
     }
 
     .empty-state {
-      min-height: 450px;
+      min-height: 470px;
       display: flex;
       flex-direction: column;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       text-align: center;
-      padding: 25px;
+      padding: 22px;
     }
 
-    .empty-icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 58px;
-      height: 58px;
-      border-radius: 16px;
-      background: var(--red-light);
-      color: var(--red);
-      font-size: 27px;
+    .empty-mark {
+      width: 52px;
+      height: 52px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      border: 1px solid #51212a;
+      color: #ff8795;
+      background: #211014;
+      font-size: 23px;
       margin-bottom: 16px;
     }
 
     .empty-state h3 {
-      font-size: 15px;
+      font-size: 14px;
       margin: 0 0 8px;
     }
 
     .empty-state p {
-      font-size: 12px;
-      line-height: 1.7;
+      font-size: 11px;
       color: var(--muted);
+      line-height: 1.8;
       margin: 0;
+    }
+
+    .profile-overline {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1.4px;
+      color: #f06b7c;
+      font-weight: 800;
+      margin-bottom: 9px;
     }
 
     .character-name {
       font-size: 23px;
       line-height: 1.25;
-      font-weight: 800;
-      letter-spacing: -0.8px;
-      margin: 0 0 9px;
+      letter-spacing: -.7px;
       overflow-wrap: anywhere;
+      margin: 0 0 7px;
     }
 
-    .character-description {
-      font-size: 12px;
-      line-height: 1.75;
-      color: #555b63;
-      margin: 16px 0 20px;
+    .character-role {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .profile-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 17px 0;
     }
 
     .section-label {
-      font-size: 10px;
-      text-transform: uppercase;
-      font-weight: 800;
-      letter-spacing: 1px;
       color: var(--muted);
-      margin: 20px 0 10px;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      font-weight: 800;
+      margin: 18px 0 9px;
     }
 
     .book-tags {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
+      gap: 5px;
     }
 
     .book-tag {
-      display: inline-flex;
-      align-items: center;
-      border-radius: 6px;
-      padding: 6px 8px;
-      font-size: 10px;
-      font-weight: 700;
-      background: #f0f0f2;
-      color: #42454a;
+      border: 1px solid var(--border);
+      background: #1c1c1c;
+      border-radius: 5px;
+      padding: 6px 7px;
+      font-size: 9px;
+      line-height: 1.3;
+      color: #e4e4e4;
     }
 
     .book-tag.f {
-      background: #f8e8eb;
-      color: #8b1d2b;
+      border-color: #68303a;
+      color: #ffbfc7;
     }
 
     .book-tag.w {
-      background: #e8eefb;
-      color: #294f91;
+      border-color: #3c5273;
+      color: #b7ceff;
     }
 
     .book-tag.h {
-      background: #e4f3e8;
-      color: #21633a;
+      border-color: #38614b;
+      color: #b5e6c7;
+    }
+
+    .character-description {
+      margin: 15px 0;
+      color: #d0d0d0;
+      font-size: 11px;
+      line-height: 1.85;
+    }
+
+    .connection-count {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 500;
     }
 
     .connection-list {
       display: flex;
       flex-direction: column;
-      gap: 7px;
+      gap: 6px;
     }
 
     .connection-button {
       width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
       text-align: left;
       padding: 10px;
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
+      border: 1px solid #292929;
+      border-radius: 6px;
+      background: #151515;
+      color: var(--text);
     }
 
     .connection-button:hover {
-      border-color: var(--red);
-      background: #fffafb;
+      background: #211416;
+      border-color: #71303a;
     }
 
     .connection-name {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
     }
 
     .connection-type {
       display: block;
       color: var(--muted);
-      font-size: 10px;
-      font-weight: 400;
+      font-size: 9px;
       margin-top: 4px;
+      line-height: 1.5;
     }
 
-    .arrow {
-      color: var(--red);
-      font-size: 16px;
+    .connection-arrow {
+      color: #f06b7c;
+      font-size: 17px;
+      flex-shrink: 0;
     }
 
     .directory-panel {
-      margin-top: 18px;
+      margin-top: 14px;
     }
 
-    .directory-content {
-      padding: 15px;
+    .directory-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
     }
 
-    .directory-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 9px;
+    .directory-toolbar .panel-caption {
+      margin-top: 4px;
     }
 
-    .directory-card {
+    .directory-list {
+      padding: 4px 17px;
+    }
+
+    .directory-row {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 3px;
+      border: 0;
+      border-bottom: 1px solid #242424;
+      background: transparent;
+      color: var(--text);
       text-align: left;
-      padding: 12px;
+    }
+
+    .directory-row:last-child {
+      border-bottom: 0;
+    }
+
+    .directory-row:hover .directory-name {
+      color: #ff8795;
+    }
+
+    .directory-main {
+      display: flex;
+      align-items: center;
+      gap: 10px;
       min-width: 0;
-      border: 1px solid var(--border);
-      background: white;
-      border-radius: 9px;
     }
 
-    .directory-card:hover {
-      border-color: var(--red);
-      transform: translateY(-1px);
+    .directory-dot {
+      width: 7px;
+      height: 7px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      background: var(--white-line);
     }
 
-    .directory-card strong {
-      display: block;
-      font-size: 12px;
-      line-height: 1.4;
+    .directory-dot.main {
+      background: var(--red);
+    }
+
+    .directory-dot.historical {
+      background: #9978b6;
+    }
+
+    .directory-name {
+      font-size: 11px;
+      font-weight: 700;
       overflow-wrap: anywhere;
     }
 
-    .directory-card span {
+    .directory-role {
       display: block;
       color: var(--muted);
-      font-size: 10px;
-      margin-top: 6px;
+      font-size: 9px;
+      font-weight: 400;
+      margin-top: 4px;
+      line-height: 1.5;
+    }
+
+    .directory-arrow {
+      color: #777;
+      font-size: 14px;
+      flex-shrink: 0;
     }
 
     .no-results {
-      grid-column: 1 / -1;
-      text-align: center;
-      padding: 35px 15px;
       color: var(--muted);
-      font-size: 12px;
+      text-align: center;
+      padding: 35px 10px;
+      font-size: 11px;
     }
 
     .disclaimer {
-      font-size: 11px;
-      line-height: 1.7;
-      color: var(--muted);
-      margin-top: 18px;
+      color: var(--subtle);
+      font-size: 10px;
+      line-height: 1.8;
+      margin: 17px 0 0;
     }
 
     footer {
       max-width: 1600px;
       margin: 0 auto;
-      padding: 0 30px 30px;
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1.7;
+      padding: 0 28px 25px;
+      color: var(--subtle);
+      font-size: 10px;
+      line-height: 1.9;
     }
 
     footer a {
-      color: var(--red);
+      color: #f06b7c;
+      text-decoration: none;
     }
 
-    @media (max-width: 1100px) {
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 1000px) {
       .workspace {
-        grid-template-columns: minmax(0, 1fr) 290px;
+        grid-template-columns: minmax(0, 1fr) 280px;
       }
 
-      .directory-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+      #network {
+        height: 540px;
+      }
+
+      .details-panel {
+        min-height: 540px;
       }
     }
 
-    @media (max-width: 800px) {
-      .topbar {
-        padding: 17px;
-      }
-
+    @media (max-width: 760px) {
       .topbar-inner {
-        align-items: flex-start;
-      }
-
-      h1 {
-        font-size: 19px;
+        padding: 14px;
       }
 
       .page {
-        padding: 20px 14px 28px;
+        padding: 21px 13px 28px;
       }
 
       .workspace {
@@ -541,54 +682,66 @@
       }
 
       #network {
-        height: 520px;
+        height: 470px;
       }
 
       .details-panel {
-        min-height: auto;
+        min-height: 0;
       }
 
       .empty-state {
-        min-height: 230px;
+        min-height: 210px;
       }
 
-      .directory-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+      .spoiler {
+        font-size: 8px;
+        padding: 7px;
+      }
+
+      h1 {
+        font-size: 17px;
+      }
+
+      .intro h2 {
+        font-size: 21px;
       }
 
       footer {
-        padding: 0 14px 24px;
+        padding: 0 13px 22px;
       }
     }
 
     @media (max-width: 480px) {
       .brand-mark {
-        width: 39px;
-        height: 39px;
-        font-size: 21px;
-      }
-
-      .spoiler-label {
-        font-size: 9px;
-        padding: 7px;
+        width: 37px;
+        height: 37px;
+        font-size: 19px;
       }
 
       .subtitle {
-        max-width: 220px;
+        max-width: 190px;
         line-height: 1.5;
       }
 
+      .toolbar {
+        gap: 7px;
+      }
+
       .filter-select {
-        flex: 1 1 140px;
+        flex: 1 1 135px;
         min-width: 0;
       }
 
-      .action-button {
-        flex: 1;
+      .toolbar > .btn {
+        flex: 1 1 90px;
       }
 
       #network {
-        height: 440px;
+        height: 420px;
+      }
+
+      .intro p {
+        font-size: 11px;
       }
     }
   </style>
@@ -600,175 +753,165 @@
       <div class="brand">
         <div class="brand-mark">M</div>
         <div>
-          <h1>Mistborn Character Connections</h1>
-          <div class="subtitle">A character relationship explorer · Era 1</div>
+          <h1>Mistborn</h1>
+          <div class="subtitle">Character connections · Original trilogy</div>
         </div>
       </div>
-      <div class="spoiler-label">FULL TRILOGY SPOILERS</div>
+      <div class="spoiler">FULL TRILOGY SPOILERS</div>
     </div>
   </header>
 
   <main class="page">
     <section class="intro">
-      <h2>Explore the people of the Final Empire</h2>
+      <div class="eyebrow">The Final Empire · Era One</div>
+      <h2>Every story connects.</h2>
       <p>
-        Discover the characters from Brandon Sanderson's original Mistborn
-        trilogy and explore how their stories connect. Select a character
-        in the graph or directory to see their profile and known relationships.
+        Explore the people at the heart of Mistborn. Start with a character,
+        follow their relationships, and expand the network to uncover how
+        the original trilogy fits together.
       </p>
     </section>
 
     <section class="toolbar">
       <div class="search-wrap">
-        <span class="search-icon">⌕</span>
-        <input
-          id="search"
-          type="search"
-          placeholder="Search characters..."
-          aria-label="Search characters"
-        >
+        <span class="search-symbol">⌕</span>
+        <input id="search" type="search" placeholder="Find a character..." aria-label="Search characters">
       </div>
 
-      <select id="bookFilter" class="filter-select" aria-label="Filter by book">
+      <select id="bookFilter" class="filter-select" aria-label="Filter characters by book">
         <option value="all">All three books</option>
         <option value="F">The Final Empire</option>
         <option value="W">The Well of Ascension</option>
         <option value="H">The Hero of Ages</option>
       </select>
 
-      <select id="relationFilter" class="filter-select" aria-label="Filter relationship types">
+      <select id="relationFilter" class="filter-select" aria-label="Filter relationships">
         <option value="all">All relationships</option>
         <option value="family">Family</option>
         <option value="romance">Romance</option>
         <option value="ally">Allies</option>
         <option value="enemy">Enemies</option>
-        <option value="crew">Crew and associates</option>
-        <option value="other">Other connections</option>
+        <option value="crew">Crew</option>
+        <option value="other">Other</option>
       </select>
 
-      <button class="action-button" id="resetButton">Reset view</button>
-      <button class="action-button primary" id="fitButton">Fit graph</button>
+      <button class="btn" id="resetButton">Reset</button>
+      <button class="btn primary" id="fitButton">Center graph</button>
     </section>
 
-    <section class="stats">
+    <section class="stats" aria-live="polite">
       <div class="stat">
-        <div class="stat-number" id="characterCount">0</div>
-        <div class="stat-label">Characters shown</div>
+        <span class="stat-dot"></span>
+        <span class="stat-number" id="characterCount">0</span>
+        <span>characters visible</span>
       </div>
       <div class="stat">
-        <div class="stat-number" id="relationshipCount">0</div>
-        <div class="stat-label">Relationships shown</div>
+        <span class="stat-number" id="relationshipCount">0</span>
+        <span>connections visible</span>
       </div>
       <div class="stat">
-        <div class="stat-number">3</div>
-        <div class="stat-label">Books covered</div>
+        <span id="currentMode">Focused view</span>
       </div>
     </section>
 
     <section class="workspace">
-      <div class="graph-panel">
+      <div class="panel">
         <div class="panel-heading">
           <div>
-            <h3>Character relationship map</h3>
-            <div class="panel-subtitle">Select a node to inspect a character</div>
+            <h3>Relationship map</h3>
+            <div class="panel-caption">Click a character to explore their network</div>
           </div>
+          <span class="view-indicator" id="viewIndicator">FOCUSED</span>
         </div>
 
-        <div id="network" aria-label="Interactive character relationship graph"></div>
+        <div id="network" aria-label="Interactive Mistborn character graph"></div>
 
-        <div class="graph-footer">
+        <div class="graph-controls">
+          <button class="btn primary" id="expandButton">Expand connections</button>
+          <button class="btn" id="focusedButton">Focus character</button>
+          <button class="btn" id="allButton">Show all characters</button>
+        </div>
+
+        <div class="legend">
           <div class="legend-item">
-            <span class="legend-dot" style="background:#a51d2d"></span>
-            Main characters
+            <span class="legend-dot" style="background:#c52a3d"></span>
+            Main cast
           </div>
           <div class="legend-item">
-            <span class="legend-dot" style="background:#64748b"></span>
-            Supporting characters
+            <span class="legend-dot" style="background:#777"></span>
+            Supporting cast
           </div>
           <div class="legend-item">
-            <span class="legend-dot" style="background:#8b6ca8"></span>
-            Historical or supernatural figures
+            <span class="legend-dot" style="background:#9978b6"></span>
+            Historical / supernatural
           </div>
-          <span>Scroll to zoom · Drag to move</span>
         </div>
       </div>
 
-      <aside class="details-panel">
+      <aside class="panel details-panel">
         <div class="panel-heading">
           <div>
             <h3>Character profile</h3>
-            <div class="panel-subtitle">Details and connections</div>
+            <div class="panel-caption">Biography and relationships</div>
           </div>
         </div>
-        <div id="details" class="details-content">
-          <div class="empty-state">
-            <div class="empty-icon">✦</div>
-            <h3>Choose a character</h3>
-            <p>
-              Select any character in the graph or directory to learn
-              about their role and connections throughout the trilogy.
-            </p>
-          </div>
-        </div>
+        <div id="details" class="details-content"></div>
       </aside>
     </section>
 
-    <section class="directory-panel">
+    <section class="panel directory-panel">
       <div class="panel-heading">
-        <div>
-          <h3>Character directory</h3>
-          <div class="panel-subtitle">Select any name to open their profile</div>
+        <div class="directory-toolbar">
+          <div>
+            <h3>Character directory</h3>
+            <div class="panel-caption">Choose any character to center the graph on them</div>
+          </div>
         </div>
-        <div class="panel-subtitle" id="directoryCount"></div>
+        <span class="panel-caption" id="directoryCount">0 characters</span>
       </div>
-      <div class="directory-content">
-        <div class="directory-grid" id="directory"></div>
-      </div>
+      <div class="directory-list" id="directory"></div>
     </section>
 
     <p class="disclaimer">
-      This is a curated, expandable character dataset, not a verified
-      exhaustive index of every person mentioned in the books. Descriptions
-      and relationships contain spoilers for all three novels. Relationship
-      labels summarize important story connections rather than every
-      interaction. Historical figures, supernatural beings, and briefly
-      mentioned characters are included when relevant to the trilogy.
+      This is an expandable, curated fan-made dataset, not a verified exhaustive
+      list of every named person in the three novels. Character descriptions
+      and relationships contain spoilers. Relationship labels are summaries
+      of major connections, not a record of every interaction.
     </p>
   </main>
 
   <footer>
-    Research starting points:
-    <a href="https://coppermind.net/wiki/The_Final_Empire" target="_blank" rel="noopener noreferrer">The Final Empire</a>,
-    <a href="https://coppermind.net/wiki/The_Well_of_Ascension" target="_blank" rel="noopener noreferrer">The Well of Ascension</a>,
-    and
-    <a href="https://coppermind.net/wiki/The_Hero_of_Ages" target="_blank" rel="noopener noreferrer">The Hero of Ages</a>
-    on the Coppermind.
-    This is an unofficial fan project and is not affiliated with Brandon Sanderson.
+    Research references:
+    <a href="https://coppermind.net/wiki/The_Final_Empire" target="_blank" rel="noopener noreferrer">The Final Empire</a> ·
+    <a href="https://coppermind.net/wiki/The_Well_of_Ascension" target="_blank" rel="noopener noreferrer">The Well of Ascension</a> ·
+    <a href="https://coppermind.net/wiki/The_Hero_of_Ages" target="_blank" rel="noopener noreferrer">The Hero of Ages</a>.
+    Unofficial fan project, not affiliated with Brandon Sanderson.
   </footer>
 
   <script>
     /*
-      BOOK KEY:
-      F = Mistborn: The Final Empire
+      BOOK KEYS
+      F = The Final Empire
       W = The Well of Ascension
       H = The Hero of Ages
 
-      CHARACTER DATA:
-      Add characters to the characters array.
-      Add connections to the relationships array.
+      To add a character:
+      1. Add a unique object to characters.
+      2. Add their relationships to relationships.
+      3. Use existing IDs exactly as written.
 
-      Keep IDs unique. Every relationship must refer to an existing
-      character ID. Relationship descriptions should be spoiler-aware.
+      This dataset is curated and should be checked against the books
+      before being treated as a complete character index.
     */
 
     const characters = [
       {
         id: "vin",
         name: "Vin",
-        role: "Mistborn · Central protagonist",
+        role: "Mistborn · Main protagonist",
         books: ["F", "W", "H"],
         type: "main",
-        description: "A streetwise skaa girl who becomes a powerful Mistborn. Kelsier recruits her into his crew, and she learns to navigate both the criminal underworld and noble society. Her relationship with Elend and her connection to the mists become central to the fate of the world."
+        description: "A streetwise skaa girl recruited by Kelsier into a plan to overthrow the Lord Ruler. Vin learns to use her Allomantic abilities while navigating the noble court. Her relationship with Elend and her connection to the mists become central to the fate of the world."
       },
       {
         id: "kelsier",
@@ -776,7 +919,7 @@
         role: "Mistborn · The Survivor",
         books: ["F", "W", "H"],
         type: "main",
-        description: "A charismatic Mistborn and master thief who plans a rebellion against the Lord Ruler. After surviving the Pits of Hathsin, he becomes known as the Survivor. His ideals, legacy, and religious symbolism continue to influence people after his death."
+        description: "A charismatic Mistborn and master thief who organizes a rebellion against the Lord Ruler. His survival of the Pits of Hathsin and the death of his wife shape his determination to inspire hope. His legacy continues to influence the world after his death."
       },
       {
         id: "elend",
@@ -784,7 +927,7 @@
         role: "Nobleman · King and emperor",
         books: ["F", "W", "H"],
         type: "main",
-        description: "An idealistic nobleman who hopes to create a fairer society after the Lord Ruler's fall. He falls in love with Vin and takes on the difficult responsibility of ruling. He eventually becomes a Mistborn."
+        description: "An idealistic nobleman who wants to build a fairer society after the Lord Ruler's fall. He falls in love with Vin and assumes the difficult responsibility of ruling. He eventually becomes a Mistborn."
       },
       {
         id: "sazed",
@@ -792,7 +935,7 @@
         role: "Terris Keeper",
         books: ["F", "W", "H"],
         type: "main",
-        description: "A Terris Keeper who preserves knowledge of many religions and cultures. He becomes a trusted ally of Kelsier's crew and a close friend to Vin and Elend. His struggle with faith after Tindwyl's death is crucial to the trilogy's conclusion."
+        description: "A Terris Keeper who preserves the knowledge of many religions and cultures. He becomes a trusted ally of Kelsier's crew and a close friend to Vin and Elend. His crisis of faith and search for meaning are central to the trilogy's conclusion."
       },
       {
         id: "marsh",
@@ -800,7 +943,7 @@
         role: "Allomancer · Steel Inquisitor",
         books: ["F", "W", "H"],
         type: "main",
-        description: "Kelsier's older brother, initially an ally of the rebellion. He infiltrates the Steel Inquisitors but is eventually transformed into one of them. His story becomes entangled with Ruin's influence."
+        description: "Kelsier's older brother, who initially works with the rebellion. He infiltrates the Steel Inquisitors and is eventually transformed into one. His story becomes entangled with Ruin's influence."
       },
       {
         id: "spook",
@@ -808,7 +951,7 @@
         role: "Tineye · Crew member",
         books: ["F", "W", "H"],
         type: "main",
-        description: "A young member of Kelsier's crew who speaks in a distinctive street dialect. His role grows considerably in The Hero of Ages, when he becomes involved in the uprising in Urteau and earns the title Survivor of the Flames."
+        description: "A young member of Kelsier's crew who speaks in a distinctive street dialect. His role grows considerably in The Hero of Ages, when he becomes involved in the uprising in Urteau."
       },
       {
         id: "breeze",
@@ -816,7 +959,7 @@
         role: "Soother · Crew member",
         books: ["F", "W", "H"],
         type: "main",
-        description: "A refined and often cynical member of Kelsier's crew who uses emotional Allomancy to soothe other people's emotions. Beneath his sarcasm, he is a loyal friend and a skilled manipulator of social situations."
+        description: "A refined, sarcastic member of Kelsier's crew who uses emotional Allomancy to soothe people's emotions. Beneath his cynicism, he is a loyal friend and skilled social manipulator."
       },
       {
         id: "ham",
@@ -832,7 +975,7 @@
         role: "Smoker · Carpenter",
         books: ["F", "W", "H"],
         type: "main",
-        description: "A gruff carpenter and Misting who can burn copper to hide Allomantic activity. He helps Kelsier's crew and provides both practical skills and a place to operate."
+        description: "A gruff carpenter and Misting who can burn copper to hide Allomantic activity. He helps Kelsier's crew with his practical skills and provides a place for the crew to operate."
       },
       {
         id: "dockson",
@@ -840,15 +983,15 @@
         role: "Organizer · Crew member",
         books: ["F", "W", "H"],
         type: "main",
-        description: "Kelsier's trusted organizer and planner. He handles the practical logistics of the crew's operations and carries personal reasons for opposing the Final Empire."
+        description: "Kelsier's trusted organizer and planner. He handles the practical logistics of the crew's operations and has personal reasons for opposing the Final Empire."
       },
       {
         id: "oreseur",
         name: "OreSeur",
         role: "Kandra",
-        books: ["F", "W", "H"],
+        books: ["F", "W"],
         type: "supporting",
-        description: "A kandra contracted to Kelsier and later Vin. His service to Vin becomes complicated by a dangerous impersonation scheme involving TenSoon."
+        description: "A kandra contracted to Kelsier and later Vin. His role in Vin's household becomes complicated by a dangerous impersonation scheme."
       },
       {
         id: "tensoon",
@@ -856,7 +999,7 @@
         role: "Kandra · Third Generation",
         books: ["W", "H"],
         type: "supporting",
-        description: "A kandra who is ordered to impersonate OreSeur and spy on Vin. Over time, he develops a complicated connection with her and becomes important to the kandra's future."
+        description: "A kandra ordered to impersonate OreSeur and spy on Vin. He develops a complicated connection with her and becomes important to the kandra's future."
       },
       {
         id: "tindwyl",
@@ -870,25 +1013,25 @@
         id: "zane",
         name: "Zane Venture",
         role: "Mistborn · Assassin",
-        books: ["W", "H"],
+        books: ["W"],
         type: "supporting",
-        description: "A troubled Mistborn who is sent against Vin. He is Straff Venture's son and Elend's half-brother. His encounters with Vin reveal his isolation and instability."
+        description: "A troubled Mistborn sent against Vin. He is Straff Venture's son and Elend's half-brother. His encounters with Vin reveal his isolation and instability."
       },
       {
         id: "straff",
         name: "Straff Venture",
-        role: "Nobleman · King",
+        role: "Nobleman · Political rival",
         books: ["F", "W", "H"],
         type: "supporting",
-        description: "Elend's father and a powerful noble leader. He commands one of the armies besieging Luthadel and is willing to use manipulation, including his son Zane, to secure power."
+        description: "Elend's father and a powerful noble leader. He commands one of the armies besieging Luthadel and is willing to manipulate others, including his son Zane, to secure power."
       },
       {
         id: "cett",
         name: "Ashweather Cett",
-        role: "Nobleman · King",
+        role: "Nobleman · Regional ruler",
         books: ["W", "H"],
         type: "supporting",
-        description: "A regional ruler who brings an army to Luthadel during the succession crisis. His shifting political interests make him an important figure in the struggle to establish a new government."
+        description: "A regional ruler who brings an army to Luthadel during the succession crisis. His shifting political interests make him important in the struggle to establish a new government."
       },
       {
         id: "allrianne",
@@ -896,7 +1039,7 @@
         role: "Noblewoman",
         books: ["W", "H"],
         type: "supporting",
-        description: "Ashweather Cett's daughter. She becomes romantically involved with Breeze, despite their contrasting personalities and social backgrounds."
+        description: "Ashweather Cett's daughter. She becomes romantically involved with Breeze despite their contrasting personalities and social backgrounds."
       },
       {
         id: "yomen",
@@ -912,7 +1055,7 @@
         role: "The Citizen",
         books: ["H"],
         type: "supporting",
-        description: "A revolutionary leader who takes control of Urteau after the Lord Ruler's death. His brutal methods and rigid ideology make him an antagonist in Spook's storyline."
+        description: "A revolutionary leader who takes control of Urteau after the Lord Ruler's death. His brutal methods make him an antagonist in Spook's storyline."
       },
       {
         id: "beldre",
@@ -928,13 +1071,13 @@
         role: "Soldier · Survivor's follower",
         books: ["F", "W", "H"],
         type: "supporting",
-        description: "A soldier who fought alongside Kelsier and later serves in Elend's forces. His experiences connect the original rebellion with the struggles of the new empire."
+        description: "A soldier who fought alongside Kelsier and later serves in Elend's forces. His experiences connect the original rebellion with the new empire."
       },
       {
         id: "yeden",
         name: "Yeden",
         role: "Skaa rebellion leader",
-        books: ["F", "W", "H"],
+        books: ["F"],
         type: "supporting",
         description: "A leader of the skaa rebellion who works with Kelsier to organize resistance against the Final Empire."
       },
@@ -968,7 +1111,7 @@
         role: "Historical figure · Worldbringer",
         books: ["F", "W", "H"],
         type: "historical",
-        description: "A historical figure whose journey and writings are central to the Terris Prophecies. His account of the Deepness helps Vin and others understand the world's history."
+        description: "A historical figure whose journey and writings are central to the Terris Prophecies. His account of the Deepness helps later characters understand the world's history."
       },
       {
         id: "kwaan",
@@ -989,26 +1132,18 @@
       {
         id: "preservation",
         name: "Preservation",
-        role: "Shard · The Mist Spirit's source",
+        role: "Shard · The mists",
         books: ["F", "W", "H"],
         type: "historical",
         description: "The opposing force to Ruin, whose actions and sacrifice are central to the world's survival. Preservation's remaining power manifests through the mists and influences Vin's journey."
       },
       {
-        id: "human",
-        name: "Human",
-        role: "Koloss",
-        books: ["H"],
-        type: "supporting",
-        description: "A koloss who can speak with Vin and offers insight into the nature and origins of the koloss."
-      },
-      {
         id: "ferson",
         name: "Ferson Penrod",
-        role: "Nobleman · Political leader",
+        role: "Political leader",
         books: ["F", "W", "H"],
         type: "supporting",
-        description: "A noble political figure who becomes involved in the changing power structure following the Lord Ruler's fall."
+        description: "A political figure involved in the changing power structure following the Lord Ruler's fall."
       },
       {
         id: "goradel",
@@ -1022,7 +1157,7 @@
         id: "jastes",
         name: "Jastes Lekal",
         role: "Nobleman",
-        books: ["F", "W", "H"],
+        books: ["F", "W"],
         type: "supporting",
         description: "A nobleman connected to Elend's early social circle and the political tensions surrounding the fall of the Final Empire."
       },
@@ -1030,7 +1165,7 @@
         id: "trendalan",
         name: "Trendalan",
         role: "Nobleman",
-        books: ["F", "W", "H"],
+        books: ["F"],
         type: "supporting",
         description: "A nobleman associated with the social and political circles of the Final Empire."
       },
@@ -1038,7 +1173,7 @@
         id: "camon",
         name: "Camon",
         role: "Criminal crew leader",
-        books: ["F", "W", "H"],
+        books: ["F"],
         type: "supporting",
         description: "A criminal who employs Vin before she is recruited by Kelsier. His treatment of Vin helps establish her early circumstances and survival instincts."
       },
@@ -1046,17 +1181,17 @@
         id: "slowswift",
         name: "Slowswift",
         role: "Nobleman · Storyteller",
-        books: ["F", "W", "H"],
+        books: ["F"],
         type: "supporting",
         description: "A nobleman known for his stories and connection to the social circles of the Final Empire."
       },
       {
         id: "noorden",
         name: "Noorden",
-        role: "Skaa informant",
+        role: "Supporting character",
         books: ["H"],
         type: "supporting",
-        description: "A named character who appears in The Hero of Ages and is connected to the book's unfolding events."
+        description: "A named character associated with the events of The Hero of Ages. Their detailed role should be checked against the relevant book entry before adding further connections."
       },
       {
         id: "durn",
@@ -1064,15 +1199,7 @@
         role: "Informant",
         books: ["H"],
         type: "supporting",
-        description: "An informant who assists Spook while he gathers intelligence in Urteau."
-      },
-      {
-        id: "gn eorndin".replace(" ", ""),
-        name: "Gneorndin Cett",
-        role: "Nobleman",
-        books: ["H"],
-        type: "supporting",
-        description: "A member of the Cett family who appears in the political and military events of The Hero of Ages."
+        description: "An informant who helps Spook gather intelligence in Urteau."
       },
       {
         id: "fatren",
@@ -1083,25 +1210,9 @@
         description: "A man whose town is threatened by Ruin's forces. His encounter with Elend helps illustrate the devastation spreading across the empire."
       },
       {
-        id: "druffel",
-        name: "Druffel",
-        role: "Townsperson",
-        books: ["H"],
-        type: "supporting",
-        description: "A named character who appears in the early chapters of The Hero of Ages."
-      },
-      {
-        id: "sev",
-        name: "Sev",
-        role: "Townsperson",
-        books: ["H"],
-        type: "supporting",
-        description: "A named character who appears in the early chapters of The Hero of Ages."
-      },
-      {
         id: "kanpaar",
         name: "KanPaar",
-        role: "Kandra",
+        role: "Kandra elder",
         books: ["H"],
         type: "supporting",
         description: "A kandra elder whose actions become significant during the crisis among the kandra in The Hero of Ages."
@@ -1115,172 +1226,97 @@
         description: "A kandra who appears during the events involving the kandra homeland and the Resolution."
       },
       {
-        id: "garv",
-        name: "Garv",
-        role: "Terris refugee",
-        books: ["H"],
-        type: "supporting",
-        description: "A named character mentioned among the people involved in the events of The Hero of Ages."
-      },
-      {
-        id: "harathdal",
-        name: "Harathdal",
-        role: "Terris refugee",
-        books: ["H"],
-        type: "supporting",
-        description: "A named character appearing in the later events of The Hero of Ages."
-      },
-      {
-        id: "dedri",
-        name: "Dedri Vasting",
-        role: "Named character",
-        books: ["H"],
-        type: "supporting",
-        description: "A named character appearing in The Hero of Ages."
-      },
-      {
-        id: "aslydin",
-        name: "Aslydin",
-        role: "Named character",
-        books: ["H"],
-        type: "supporting",
-        description: "A named character appearing in The Hero of Ages."
-      },
-      {
         id: "vedlew",
         name: "Vedlew",
         role: "Terris elder",
         books: ["H"],
         type: "supporting",
-        description: "A Terris elder encountered by Sazed as he visits the Terris people."
-      },
-      {
-        id: "bennitson",
-        name: "Bennitson",
-        role: "Named character",
-        books: ["H"],
-        type: "supporting",
-        description: "A named character mentioned during the events of The Hero of Ages."
-      },
-      {
-        id: "trentison",
-        name: "Trentison",
-        role: "Named character",
-        books: ["H"],
-        type: "supporting",
-        description: "A named character mentioned during the events of The Hero of Ages."
-      },
-      {
-        id: "durn",
-        name: "Durn",
-        role: "Informant",
-        books: ["H"],
-        type: "supporting",
-        description: "An informant who helps Spook gather intelligence in Urteau."
-      },
-      {
-        id: "belvedere",
-        name: "Beldre's associate",
-        role: "Unspecified supporting character",
-        books: ["H"],
-        type: "supporting",
-        description: "Placeholder removed from the intended roster; use named character records for additions."
+        description: "A Terris elder encountered as Sazed visits the Terris people."
       }
     ];
 
     /*
-      Relationships are undirected. Each edge connects two character IDs.
-      type controls the relationship filter.
+      Each relationship is:
+      [characterId1, characterId2, label, category]
+
+      The labels appear in the profile and when hovering over a line.
+      Lines are deliberately unlabeled by default to reduce clutter.
     */
 
     const relationships = [
-      ["vin", "kelsier", "mentor", "crew"],
-      ["vin", "elend", "romantic partners", "romance"],
-      ["vin", "sazed", "close friends", "ally"],
-      ["vin", "marsh", "recruiter and ally", "ally"],
-      ["vin", "spook", "crew associates", "crew"],
-      ["vin", "breeze", "crew associates", "crew"],
-      ["vin", "ham", "crew associates", "crew"],
-      ["vin", "clubs", "crew associates", "crew"],
-      ["vin", "dockson", "crew associates", "crew"],
-      ["vin", "oreseur", "kandra servant", "other"],
-      ["vin", "tensoon", "kandra ally", "ally"],
-      ["vin", "reen", "siblings", "family"],
-      ["vin", "rashek", "opponents", "enemy"],
-      ["vin", "zane", "rivals and adversaries", "enemy"],
-      ["vin", "mare", "connected through Kelsier", "other"],
-      ["vin", "ruin", "opponents", "enemy"],
-      ["vin", "preservation", "connected to the mists", "other"],
-      ["vin", "yomen", "political opponents", "enemy"],
-      ["vin", "quellion", "opponents", "enemy"],
-      ["kelsier", "marsh", "brothers", "family"],
-      ["kelsier", "dockson", "crew associates", "crew"],
-      ["kelsier", "breeze", "crew associates", "crew"],
-      ["kelsier", "ham", "crew associates", "crew"],
-      ["kelsier", "clubs", "crew associates", "crew"],
-      ["kelsier", "spook", "crew associates", "crew"],
-      ["kelsier", "yeden", "rebellion allies", "ally"],
-      ["kelsier", "mare", "husband and wife", "romance"],
-      ["kelsier", "rashek", "rebellion against the Lord Ruler", "enemy"],
-      ["kelsier", "preservation", "connected to the Survivor's legacy", "other"],
-      ["elend", "straff", "father and son", "family"],
-      ["elend", "zane", "half-brothers", "family"],
-      ["elend", "sazed", "trusted allies", "ally"],
-      ["elend", "ham", "military allies", "ally"],
-      ["elend", "breeze", "political and military allies", "ally"],
-      ["elend", "allrianne", "connected through Breeze", "other"],
-      ["elend", "cett", "political allies and rivals", "other"],
-      ["elend", "yomen", "political opponents", "enemy"],
-      ["elend", "rashek", "successor and opponent", "enemy"],
-      ["elend", "ruin", "opponents", "enemy"],
-      ["sazed", "tindwyl", "romantic partners", "romance"],
-      ["sazed", "tensoon", "allies during the crisis", "ally"],
-      ["sazed", "kwaan", "connected through Terris history", "other"],
-      ["sazed", "alendi", "connected through the prophecies", "other"],
-      ["sazed", "ruin", "opposing forces", "enemy"],
-      ["sazed", "preservation", "connected to the world's fate", "other"],
-      ["marsh", "ruin", "manipulated by Ruin", "enemy"],
-      ["marsh", "rashek", "Steel Inquisitor legacy", "other"],
-      ["spook", "clubs", "crew associates", "crew"],
-      ["spook", "quellion", "resistance against the Citizen", "enemy"],
-      ["spook", "beldre", "allies against the Citizen", "ally"],
-      ["spook", "kelsier", "influenced by the Survivor", "other"],
-      ["breeze", "allrianne", "romantic partners", "romance"],
-      ["breeze", "ham", "crew associates", "crew"],
-      ["breeze", "cett", "connected through Allrianne", "family"],
-      ["tensoon", "oreseur", "kandra identities and service", "other"],
-      ["tensoon", "kanpaar", "kandra community", "other"],
-      ["tensoon", "haddek", "kandra community", "other"],
-      ["straff", "zane", "father and son", "family"],
-      ["straff", "cett", "rivals in the succession crisis", "enemy"],
-      ["cett", "allrianne", "father and daughter", "family"],
-      ["quellion", "beldre", "siblings", "family"],
-      ["rashek", "alendi", "historical opposition", "enemy"],
-      ["kwaan", "alendi", "connected through Terris history", "other"],
-      ["ruin", "preservation", "opposing Shards", "enemy"],
-      ["human", "vin", "communicates with Vin", "other"],
-      ["ferson", "elend", "political connection", "other"],
-      ["goradel", "sazed", "military associates", "ally"],
-      ["jastes", "elend", "noble social circle", "other"],
-      ["camon", "vin", "former employer", "other"],
-      ["noorden", "vin", "connected through events in Fadrex", "other"],
-      ["durn", "spook", "informant and ally", "ally"],
-      ["fatren", "elend", "receives help from Elend", "ally"],
-      ["vedlew", "sazed", "Terris elders and Keeper", "other"],
-      ["kanpaar", "ruin", "caught up in Ruin's plans", "other"]
+      ["vin", "kelsier", "Mentor and student", "crew"],
+      ["vin", "elend", "Romantic partners", "romance"],
+      ["vin", "sazed", "Close friends", "ally"],
+      ["vin", "marsh", "Allies in the rebellion", "ally"],
+      ["vin", "spook", "Crew associates", "crew"],
+      ["vin", "breeze", "Crew associates", "crew"],
+      ["vin", "ham", "Crew associates", "crew"],
+      ["vin", "clubs", "Crew associates", "crew"],
+      ["vin", "dockson", "Crew associates", "crew"],
+      ["vin", "oreseur", "Kandra servant", "other"],
+      ["vin", "tensoon", "Kandra ally", "ally"],
+      ["vin", "reen", "Siblings", "family"],
+      ["vin", "rashek", "Opponents", "enemy"],
+      ["vin", "zane", "Adversaries", "enemy"],
+      ["vin", "mare", "Connected through Kelsier", "other"],
+      ["vin", "ruin", "Opposing forces", "enemy"],
+      ["vin", "preservation", "Connected to the mists", "other"],
+      ["vin", "yomen", "Political opponents", "enemy"],
+      ["vin", "quellion", "Opponents", "enemy"],
+      ["kelsier", "marsh", "Brothers", "family"],
+      ["kelsier", "dockson", "Crew associates", "crew"],
+      ["kelsier", "breeze", "Crew associates", "crew"],
+      ["kelsier", "ham", "Crew associates", "crew"],
+      ["kelsier", "clubs", "Crew associates", "crew"],
+      ["kelsier", "spook", "Crew associates", "crew"],
+      ["kelsier", "yeden", "Rebellion allies", "ally"],
+      ["kelsier", "mare", "Husband and wife", "romance"],
+      ["kelsier", "rashek", "Rebellion against the Lord Ruler", "enemy"],
+      ["kelsier", "preservation", "Connected to the Survivor's legacy", "other"],
+      ["elend", "straff", "Father and son", "family"],
+      ["elend", "zane", "Half-brothers", "family"],
+      ["elend", "sazed", "Trusted allies", "ally"],
+      ["elend", "ham", "Military allies", "ally"],
+      ["elend", "breeze", "Political and military allies", "ally"],
+      ["elend", "allrianne", "Connected through Breeze", "other"],
+      ["elend", "cett", "Political allies and rivals", "other"],
+      ["elend", "yomen", "Political opponents", "enemy"],
+      ["elend", "rashek", "Successor and opponent", "enemy"],
+      ["elend", "ruin", "Opponents", "enemy"],
+      ["sazed", "tindwyl", "Romantic partners", "romance"],
+      ["sazed", "tensoon", "Allies during the crisis", "ally"],
+      ["sazed", "kwaan", "Connected through Terris history", "other"],
+      ["sazed", "alendi", "Connected through the prophecies", "other"],
+      ["sazed", "ruin", "Opposing forces", "enemy"],
+      ["sazed", "preservation", "Connected to the world's fate", "other"],
+      ["marsh", "ruin", "Manipulated by Ruin", "other"],
+      ["marsh", "rashek", "Connected through the Inquisitors", "other"],
+      ["spook", "clubs", "Crew associates", "crew"],
+      ["spook", "quellion", "Resistance against the Citizen", "enemy"],
+      ["spook", "beldre", "Allies against the Citizen", "ally"],
+      ["spook", "kelsier", "Influenced by the Survivor", "other"],
+      ["breeze", "allrianne", "Romantic partners", "romance"],
+      ["breeze", "ham", "Crew associates", "crew"],
+      ["cett", "allrianne", "Father and daughter", "family"],
+      ["tensoon", "oreseur", "Connected through kandra service", "other"],
+      ["tensoon", "kanpaar", "Kandra community", "other"],
+      ["tensoon", "haddek", "Kandra community", "other"],
+      ["straff", "zane", "Father and son", "family"],
+      ["straff", "cett", "Rivals in the succession crisis", "enemy"],
+      ["quellion", "beldre", "Siblings", "family"],
+      ["rashek", "alendi", "Historical opposition", "enemy"],
+      ["kwaan", "alendi", "Connected through Terris history", "other"],
+      ["ruin", "preservation", "Opposing Shards", "enemy"],
+      ["ferson", "elend", "Political connection", "other"],
+      ["goradel", "sazed", "Military associates", "ally"],
+      ["jastes", "elend", "Noble social circle", "other"],
+      ["camon", "vin", "Former employer", "other"],
+      ["noorden", "vin", "Connection to the trilogy's events", "other"],
+      ["durn", "spook", "Informant and ally", "ally"],
+      ["fatren", "elend", "Connected through Elend's campaign", "ally"],
+      ["vedlew", "sazed", "Terris Keeper and elder", "other"],
+      ["kanpaar", "ruin", "Caught up in Ruin's plans", "other"]
     ];
-
-    // Remove duplicate character IDs and placeholder records.
-    const characterMap = new Map();
-    characters.forEach(character => {
-      if (character.id !== "belvedere") {
-        characterMap.set(character.id, character);
-      }
-    });
-
-    // If the same character was entered twice, keep the first record.
-    // This prevents duplicate directory entries.
-    const allCharacters = [...characterMap.values()];
 
     const bookNames = {
       F: "The Final Empire",
@@ -1289,19 +1325,35 @@
     };
 
     const typeColors = {
-      main: "#a51d2d",
-      supporting: "#64748b",
-      historical: "#8b6ca8"
+      main: "#c52a3d",
+      supporting: "#777777",
+      historical: "#9978b6"
     };
 
     const relationColors = {
-      family: "#bd7654",
-      romance: "#c34e7a",
-      ally: "#6a9a78",
-      enemy: "#b83b3b",
-      crew: "#6d88b8",
-      other: "#92949b"
+      family: "#bd8060",
+      romance: "#d05c81",
+      ally: "#729c81",
+      enemy: "#c64a4a",
+      crew: "#7f98bf",
+      other: "#666666"
     };
+
+    const characterMap = new Map(characters.map(character => [character.id, character]));
+
+    // Keep only valid, unique character IDs and valid relationships.
+    const uniqueRelationships = [];
+    const seenRelationships = new Set();
+
+    relationships.forEach(([from, to, label, category]) => {
+      if (!characterMap.has(from) || !characterMap.has(to) || from === to) return;
+
+      const key = [from, to].sort().join("|") + "|" + category;
+      if (seenRelationships.has(key)) return;
+
+      seenRelationships.add(key);
+      uniqueRelationships.push({ from, to, label, category });
+    });
 
     const searchInput = document.getElementById("search");
     const bookFilter = document.getElementById("bookFilter");
@@ -1310,89 +1362,81 @@
     const details = document.getElementById("details");
     const networkContainer = document.getElementById("network");
 
-    let selectedCharacterId = null;
-
     const graphNodes = new vis.DataSet([]);
     const graphEdges = new vis.DataSet([]);
 
+    let selectedId = "vin";
+    let viewMode = "focused";
+    let expandedDepth = 1;
+
     const network = new vis.Network(
       networkContainer,
-      {
-        nodes: graphNodes,
-        edges: graphEdges
-      },
+      { nodes: graphNodes, edges: graphEdges },
       {
         autoResize: true,
         interaction: {
           hover: true,
           navigationButtons: true,
           keyboard: { enabled: true },
-          multiselect: false
+          multiselect: false,
+          hideEdgesOnDrag: true,
+          tooltipDelay: 180
         },
         physics: {
           enabled: true,
-          stabilization: {
-            enabled: true,
-            iterations: 180,
-            updateInterval: 25
-          },
+          stabilization: { enabled: true, iterations: 150 },
           barnesHut: {
-            gravitationalConstant: -4200,
+            gravitationalConstant: -4300,
             centralGravity: 0.25,
             springLength: 155,
             springConstant: 0.035,
             damping: 0.12,
-            avoidOverlap: 0.25
+            avoidOverlap: 0.35
           }
         },
         nodes: {
           shape: "dot",
-          size: 17,
-          borderWidth: 2,
-          borderWidthSelected: 4,
+          size: 15,
+          borderWidth: 1,
+          borderWidthSelected: 3,
           font: {
             face: "Inter, Arial, sans-serif",
-            size: 13,
-            color: "#252525",
-            strokeWidth: 4,
-            strokeColor: "#ffffff",
-            vadjust: 5
+            size: 12,
+            color: "#f4f4f4",
+            strokeWidth: 3,
+            strokeColor: "#0c0c0c"
           },
-          chosen: {
-            node: function(values) {
-              values.borderColor = "#a51d2d";
-              values.borderWidth = 4;
-              values.size = 22;
-            }
+          shadow: {
+            enabled: false
           }
         },
         edges: {
-          width: 1.5,
-          selectionWidth: 3,
+          width: 1.2,
+          selectionWidth: 2.5,
           smooth: {
             enabled: true,
             type: "continuous",
-            roundness: 0.2
+            roundness: 0.15
           },
           color: {
-            color: "#d1d3d8",
-            highlight: "#a51d2d",
-            hover: "#a51d2d",
+            color: "#484848",
+            highlight: "#c52a3d",
+            hover: "#c52a3d",
             inherit: false
           },
           font: {
             size: 9,
             face: "Inter, Arial, sans-serif",
-            color: "#70757d",
+            color: "#f4f4f4",
             strokeWidth: 3,
-            strokeColor: "#ffffff",
+            strokeColor: "#0c0c0c",
             align: "middle"
           }
         }
       }
     );
 
-    function safeText(value) {
+    function escapeHTML(value) {
       return String(value ?? "").replace(/[&<>"']/g, char => ({
         "&": "&amp;",
         "<": "&lt;",
@@ -1402,31 +1446,22 @@
       })[char]);
     }
 
-    function characterById(id) {
+    function getCharacter(id) {
       return characterMap.get(id);
     }
 
-    function characterBookNames(character) {
-      return character.books.map(key => bookNames[key]).join(", ");
+    function bookTagHTML(character) {
+      return character.books.map(book => `
+        <span class="book-tag ${book.toLowerCase()}">${escapeHTML(bookNames[book])}</span>
+      `).join("");
     }
 
-    function bookTags(character) {
-      return character.books.map(key =>
-        `<span class="book-tag ${key.toLowerCase()}">${safeText(bookNames[key])}</span>`
-      ).join("");
-    }
-
-    function currentSearch() {
+    function currentQuery() {
       return searchInput.value.trim().toLowerCase();
     }
 
-    function matchesBook(character) {
-      const selectedBook = bookFilter.value;
-      return selectedBook === "all" || character.books.includes(selectedBook);
-    }
-
-    function matchesSearch(character) {
-      const query = currentSearch();
+    function passesSearch(character) {
+      const query = currentQuery();
       if (!query) return true;
 
       return [
@@ -1436,82 +1471,159 @@
       ].some(value => value.toLowerCase().includes(query));
     }
 
+    function passesBook(character) {
+      const selectedBook = bookFilter.value;
+      return selectedBook === "all" || character.books.includes(selectedBook);
+    }
+
     function filteredCharacters() {
-      return allCharacters.filter(character =>
-        matchesBook(character) && matchesSearch(character)
+      return characters.filter(character =>
+        passesSearch(character) && passesBook(character)
       );
     }
 
-    function validRelationships(visibleIds) {
-      const relationType = relationFilter.value;
-
-      return relationships.filter(([from, to, label, type]) => {
-        if (!visibleIds.has(from) || !visibleIds.has(to)) return false;
-        if (relationType !== "all" && relationType !== type) return false;
-
-        // When filtering by book, show a relationship only if both
-        // characters appear in that selected book.
-        if (bookFilter.value !== "all") {
-          const a = characterById(from);
-          const b = characterById(to);
-          if (!a || !b) return false;
-          if (!a.books.includes(bookFilter.value) ||
-              !b.books.includes(bookFilter.value)) return false;
-        }
-
-        return true;
-      });
+    function relationshipAllowed(relationship) {
+      const filter = relationFilter.value;
+      return filter === "all" || relationship.category === filter;
     }
 
-    function updateGraph() {
-      const visibleCharacters = filteredCharacters();
-      const visibleIds = new Set(visibleCharacters.map(c => c.id));
-      const visibleRelationships = validRelationships(visibleIds);
+    function bookRelationshipAllowed(relationship) {
+      if (bookFilter.value === "all") return true;
 
-      const nodes = visibleCharacters.map(character => ({
+      const a = getCharacter(relationship.from);
+      const b = getCharacter(relationship.to);
+
+      return !!a && !!b &&
+        a.books.includes(bookFilter.value) &&
+        b.books.includes(bookFilter.value);
+    }
+
+    function allowedRelationships() {
+      return uniqueRelationships.filter(relationship =>
+        relationshipAllowed(relationship) &&
+        bookRelationshipAllowed(relationship)
+      );
+    }
+
+    function getVisibleNetwork() {
+      const availableCharacters = filteredCharacters();
+      const availableIds = new Set(availableCharacters.map(c => c.id));
+      const edges = allowedRelationships().filter(edge =>
+        availableIds.has(edge.from) && availableIds.has(edge.to)
+      );
+
+      if (viewMode === "all") {
+        return {
+          characters: availableCharacters,
+          relationships: edges
+        };
+      }
+
+      if (!availableIds.has(selectedId)) {
+        return { characters: [], relationships: [] };
+      }
+
+      const adjacency = new Map();
+      availableCharacters.forEach(character => adjacency.set(character.id, []));
+
+      edges.forEach(edge => {
+        adjacency.get(edge.from)?.push(edge.to);
+        adjacency.get(edge.to)?.push(edge.from);
+      });
+
+      const distances = new Map([[selectedId, 0]]);
+      const queue = [selectedId];
+
+      while (queue.length) {
+        const current = queue.shift();
+        const distance = distances.get(current);
+
+        if (distance >= expandedDepth) continue;
+
+        (adjacency.get(current) || []).forEach(next => {
+          if (!distances.has(next)) {
+            distances.set(next, distance + 1);
+            queue.push(next);
+          }
+        });
+      }
+
+      const visibleIds = new Set(distances.keys());
+
+      return {
+        characters: availableCharacters.filter(character => visibleIds.has(character.id)),
+        relationships: edges.filter(edge =>
+          visibleIds.has(edge.from) && visibleIds.has(edge.to)
+        )
+      };
+    }
+
+    function updateModeUI() {
+      const indicator = document.getElementById("viewIndicator");
+      const modeLabel = document.getElementById("currentMode");
+      const expandButton = document.getElementById("expandButton");
+      const focusedButton = document.getElementById("focusedButton");
+      const allButton = document.getElementById("allButton");
+
+      indicator.textContent = viewMode === "all" ? "FULL MAP" :
+        expandedDepth === 1 ? "FOCUSED" : `EXPANDED · ${expandedDepth} LEVELS`;
+
+      modeLabel.textContent = viewMode === "all" ? "Full network" :
+        expandedDepth === 1 ? "Focused view" : `Expanded ${expandedDepth} levels`;
+
+      expandButton.classList.toggle("active", viewMode === "focused" && expandedDepth > 1);
+      focusedButton.classList.toggle("active", viewMode === "focused");
+      allButton.classList.toggle("active", viewMode === "all");
+    }
+
+    function updateGraph(fit = false) {
+      const visible = getVisibleNetwork();
+
+      const nodes = visible.characters.map(character => ({
         id: character.id,
         label: character.name,
         title: `${character.name}\n${character.role}`,
+        shape: "dot",
+        size: character.id === selectedId ? 25 :
+          character.type === "main" ? 18 :
+          character.type === "historical" ? 14 : 13,
+        borderWidth: character.id === selectedId ? 3 : 1,
         color: {
           background: typeColors[character.type] || typeColors.supporting,
-          border: typeColors[character.type] || typeColors.supporting,
+          border: character.id === selectedId ? "#ffffff" :
+            typeColors[character.type] || typeColors.supporting,
           highlight: {
-            background: "#f2cdd2",
-            border: "#a51d2d"
+            background: "#e24b5d",
+            border: "#ffffff"
           },
           hover: {
-            background: "#f2cdd2",
-            border: "#a51d2d"
+            background: "#df4558",
+            border: "#ffffff"
           }
         },
-        shape: "dot",
-        size: character.type === "main" ? 22 : character.type === "historical" ? 15 : 17,
         font: {
-          size: character.type === "main" ? 14 : 11,
           face: "Inter, Arial, sans-serif",
-          color: "#252525",
-          strokeWidth: 4,
-          strokeColor: "#ffffff"
+          size: character.id === selectedId ? 14 : 11,
+          color: "#f4f4f4",
+          strokeWidth: 3,
+          strokeColor: "#0c0c0c"
         }
       }));
 
-      const edges = visibleRelationships.map((relationship, index) => {
-        const [from, to, label, type] = relationship;
-        return {
-          id: `edge-${index}-${from}-${to}`,
-          from,
-          to,
-          label,
-          title: label,
-          color: {
-            color: relationColors[type] || relationColors.other,
-            highlight: "#a51d2d",
-            hover: "#a51d2d",
-            inherit: false
-          },
-          width: type === "family" || type === "romance" ? 2.3 : 1.4
-        };
-      });
+      const edges = visible.relationships.map((relationship, index) => ({
+        id: `edge-${index}-${relationship.from}-${relationship.to}`,
+        from: relationship.from,
+        to: relationship.to,
+        label: "",
+        title: relationship.label,
+        color: {
+          color: relationColors[relationship.category] || relationColors.other,
+          highlight: "#e24b5d",
+          hover: "#e24b5d",
+          inherit: false
+        },
+        width: relationship.category === "family" || relationship.category === "romance" ? 1.8 : 1.1
+      }));
 
       graphNodes.clear();
       graphEdges.clear();
@@ -1521,196 +1633,224 @@
       document.getElementById("characterCount").textContent = nodes.length;
       document.getElementById("relationshipCount").textContent = edges.length;
 
-      renderDirectory(visibleCharacters);
+      updateModeUI();
+      renderDirectory();
 
-      if (selectedCharacterId && visibleIds.has(selectedCharacterId)) {
-        showCharacter(selectedCharacterId, false);
-      } else if (selectedCharacterId) {
-        selectedCharacterId = null;
-        showEmptyState();
+      if (selectedId && getCharacter(selectedId)) {
+        renderProfile(selectedId);
       }
 
-      if (nodes.length > 0) {
-        network.stabilize(80);
+      if (fit) {
+        network.fit({
+          animation: { duration: 350, easingFunction: "easeInOutQuad" }
+        });
+      } else if (graphNodes.get(selectedId)) {
+        network.selectNodes([selectedId]);
       }
     }
 
-    function renderDirectory(list) {
+    function renderDirectory() {
+      const list = filteredCharacters().slice().sort((a, b) =>
+        a.name.localeCompare(b.name)
+      );
+
       document.getElementById("directoryCount").textContent =
         `${list.length} character${list.length === 1 ? "" : "s"}`;
 
       if (!list.length) {
-        directory.innerHTML =
-          '<div class="no-results">No characters match your search or filters.</div>';
+        directory.innerHTML = '<div class="no-results">No characters match your search.</div>';
         return;
       }
 
-      directory.innerHTML = list
-        .slice()
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .map(character => `
-          <button class="directory-card" data-character-id="${safeText(character.id)}">
-            <strong>${safeText(character.name)}</strong>
-            <span>${safeText(character.role)}</span>
-          </button>
-        `).join("");
+      directory.innerHTML = list.map(character => `
+        <button class="directory-row" data-character-id="${escapeHTML(character.id)}">
+          <span class="directory-main">
+            <span class="directory-dot ${escapeHTML(character.type)}"></span>
+            <span>
+              <span class="directory-name">${escapeHTML(character.name)}</span>
+              <span class="directory-role">${escapeHTML(character.role)}</span>
+            </span>
+          </span>
+          <span class="directory-arrow">›</span>
+        </button>
+      `).join("");
 
       directory.querySelectorAll("[data-character-id]").forEach(button => {
-        button.addEventListener("click", () => {
-          selectCharacter(button.dataset.characterId);
-        });
+        button.addEventListener("click", () => selectCharacter(button.dataset.characterId));
       });
     }
 
-    function showEmptyState() {
-      details.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-icon">✦</div>
-          <h3>Choose a character</h3>
-          <p>
-            Select any character in the graph or directory to learn
-            about their role and connections throughout the trilogy.
-          </p>
-        </div>
-      `;
-    }
-
-    function showCharacter(id, moveGraph = true) {
-      const character = characterById(id);
+    function renderProfile(id) {
+      const character = getCharacter(id);
       if (!character) return;
 
-      selectedCharacterId = id;
-
-      const related = relationships
-        .filter(([from, to]) => from === id || to === id)
-        .map(([from, to, label, type]) => {
-          const otherId = from === id ? to : from;
+      const related = allowedRelationships()
+        .filter(relationship =>
+          relationship.from === id || relationship.to === id
+        )
+        .map(relationship => {
+          const otherId = relationship.from === id ? relationship.to : relationship.from;
           return {
-            character: characterById(otherId),
-            label,
-            type
+            character: getCharacter(otherId),
+            label: relationship.label,
+            category: relationship.category
           };
         })
         .filter(item => item.character)
         .sort((a, b) => a.character.name.localeCompare(b.character.name));
 
-      const visibleIds = new Set(filteredCharacters().map(c => c.id));
-      const shownRelated = related.filter(item => visibleIds.has(item.character.id));
-
       details.innerHTML = `
-        <h2 class="character-name">${safeText(character.name)}</h2>
-        <div style="font-size:12px;color:var(--muted);line-height:1.6;">
-          ${safeText(character.role)}
+        <div class="profile-overline">${character.type === "main" ? "Main cast" :
+          character.type === "historical" ? "Historical / supernatural" : "Supporting cast"}</div>
+
+        <h2 class="character-name">${escapeHTML(character.name)}</h2>
+        <div class="character-role">${escapeHTML(character.role)}</div>
+
+        <div class="profile-divider"></div>
+
+        <div class="section-label">Books</div>
+        <div class="book-tags">${bookTagHTML(character)}</div>
+
+        <p class="character-description">${escapeHTML(character.description)}</p>
+
+        <div class="profile-divider"></div>
+
+        <div class="section-label">
+          Connections <span class="connection-count">(${related.length})</span>
         </div>
 
-        <div class="section-label">Appears in</div>
-        <div class="book-tags">${bookTags(character)}</div>
-
-        <p class="character-description">${safeText(character.description)}</p>
-
-        <div class="section-label">Character connections (${shownRelated.length})</div>
         <div class="connection-list">
-          ${shownRelated.length ? shownRelated.map(item => `
-            <button class="connection-button" data-related-id="${safeText(item.character.id)}">
+          ${related.length ? related.map(item => `
+            <button class="connection-button" data-related-id="${escapeHTML(item.character.id)}">
               <span>
-                <span class="connection-name">${safeText(item.character.name)}</span>
-                <span class="connection-type">${safeText(item.label)}</span>
+                <span class="connection-name">${escapeHTML(item.character.name)}</span>
+                <span class="connection-type">${escapeHTML(item.label)}</span>
               </span>
-              <span class="arrow">›</span>
+              <span class="connection-arrow">›</span>
             </button>
           `).join("") : `
-            <div style="font-size:12px;line-height:1.7;color:var(--muted);">
-              No connected characters are currently visible under these filters.
+            <div class="character-role">
+              No relationships match the current filters.
+              Try selecting “All relationships.”
             </div>
           `}
         </div>
       `;
 
       details.querySelectorAll("[data-related-id]").forEach(button => {
-        button.addEventListener("click", () => {
-          selectCharacter(button.dataset.relatedId);
-        });
+        button.addEventListener("click", () => selectCharacter(button.dataset.relatedId));
       });
-
-      if (moveGraph && graphNodes.get(id)) {
-        network.selectNodes([id]);
-        network.focus(id, {
-          scale: Math.max(network.getScale(), 0.85),
-          animation: {
-            duration: 350,
-            easingFunction: "easeInOutQuad"
-          }
-        });
-      }
     }
 
     function selectCharacter(id) {
-      if (!graphNodes.get(id)) {
-        // The character may be hidden by current filters.
-        const character = characterById(id);
-        if (!character) return;
+      if (!getCharacter(id)) return;
 
-        searchInput.value = "";
+      selectedId = id;
+      viewMode = "focused";
+      expandedDepth = 1;
+
+      const character = getCharacter(id);
+
+      // Make the selected character available if a previous filter hid them.
+      if (!passesBook(character)) {
         bookFilter.value = "all";
-        relationFilter.value = "all";
-        updateGraph();
       }
 
-      showCharacter(id, true);
-      network.selectNodes([id]);
+      if (!passesSearch(character)) {
+        searchInput.value = "";
+      }
+
+      updateGraph(true);
+      renderProfile(id);
+
+      if (graphNodes.get(id)) {
+        network.selectNodes([id]);
+        network.focus(id, {
+          scale: Math.max(network.getScale(), 0.8),
+          animation: { duration: 350, easingFunction: "easeInOutQuad" }
+        });
+      }
     }
 
-    network.on("selectNode", function(params) {
-      if (params.nodes.length) {
-        showCharacter(params.nodes[0], false);
-      }
-    });
+    function showFocusedNetwork() {
+      viewMode = "focused";
+      expandedDepth = 1;
+      updateGraph(true);
+    }
 
-    network.on("deselectNode", function() {
-      selectedCharacterId = null;
-      showEmptyState();
-    });
+    function expandNetwork() {
+      viewMode = "focused";
+      expandedDepth = expandedDepth >= 3 ? 1 : expandedDepth + 1;
+      updateGraph(true);
+    }
 
-    searchInput.addEventListener("input", updateGraph);
-    bookFilter.addEventListener("change", updateGraph);
-    relationFilter.addEventListener("change", updateGraph);
+    function showAllCharacters() {
+      viewMode = "all";
+      updateGraph(true);
+    }
 
-    document.getElementById("fitButton").addEventListener("click", () => {
-      network.fit({
-        animation: {
-          duration: 350,
-          easingFunction: "easeInOutQuad"
-        }
-      });
-    });
-
-    document.getElementById("resetButton").addEventListener("click", () => {
+    function resetView() {
       searchInput.value = "";
       bookFilter.value = "all";
       relationFilter.value = "all";
-      selectedCharacterId = null;
-      updateGraph();
-      network.unselectAll();
-      showEmptyState();
+      selectedId = "vin";
+      viewMode = "focused";
+      expandedDepth = 1;
+      updateGraph(true);
+    }
+
+    network.on("selectNode", params => {
+      if (!params.nodes.length) return;
+
+      const id = params.nodes[0];
+      selectedId = id;
+      viewMode = "focused";
+      expandedDepth = 1;
+
+      updateGraph(false);
+      renderProfile(id);
+    });
+
+    network.on("hoverEdge", params => {
+      const edge = graphEdges.get(params.edge);
+      if (!edge) return;
+
+      const relationship = uniqueRelationships.find(item =>
+        (item.from === edge.from && item.to === edge.to) ||
+        (item.from === edge.to && item.to === edge.from)
+      );
+
+      if (relationship) {
+        networkContainer.title = relationship.label;
+      }
+    });
+
+    network.on("blurEdge", () => {
+      networkContainer.title = "";
+    });
+
+    searchInput.addEventListener("input", () => {
+      // Search is for finding a character, not automatically selecting one.
+      updateGraph(true);
+    });
+
+    bookFilter.addEventListener("change", () => updateGraph(true));
+    relationFilter.addEventListener("change", () => updateGraph(true));
+
+    document.getElementById("fitButton").addEventListener("click", () => {
       network.fit({
-        animation: {
-          duration: 350,
-          easingFunction: "easeInOutQuad"
-        }
+        animation: { duration: 350, easingFunction: "easeInOutQuad" }
       });
     });
 
-    // Initial render.
-    updateGraph();
+    document.getElementById("resetButton").addEventListener("click", resetView);
+    document.getElementById("expandButton").addEventListener("click", expandNetwork);
+    document.getElementById("focusedButton").addEventListener("click", showFocusedNetwork);
+    document.getElementById("allButton").addEventListener("click", showAllCharacters);
 
-    network.once("stabilizationIterationsDone", () => {
-      network.fit({
-        animation: {
-          duration: 300,
-          easingFunction: "easeInOutQuad"
-        }
-      });
-    });
+    // Initial state: Vin and her immediate connections.
+    updateGraph(true);
+    renderProfile("vin");
   </script>
 </body>
 </html>
