@@ -540,7 +540,7 @@
 
       <div class="graph-stage">
         <div id="network" aria-label="Interactive character relationship network"></div>
-        <div class="graph-hint">Drag to move · Scroll to zoom · Select a node to inspect</div>
+        <div class="graph-hint">Top to bottom: Shards and cosmic powers → Vessels and worlds → major beings → characters. Series colors and relationship lines preserve cross-series connections. Drag to move · Scroll to zoom · Select a node to inspect</div>
       </div>
 
       <div class="graph-status">
@@ -1274,8 +1274,35 @@
       validIds.has(r[0]) && validIds.has(r[1]) && r[0] !== r[1]
     );
 
+    // Assign visual tiers for a top-down hierarchy. These levels organize the display;
+    // they do not imply family, ownership, or any other in-world relationship.
+    const hierarchyLevel = c => {
+      const id = c.id;
+      const shardIds = new Set([
+        "preservation", "ruin", "harmony", "honor", "cultivation", "odium", "retribution"
+      ]);
+      const vesselAndWorldIds = new Set([
+        "leras", "ati", "tanavast", "koravellium-avast", "rayse",
+        "sazed", "taravangian", "scadrial", "roshar"
+      ]);
+      const originalCrew = new Set([
+        "kelsier", "vin", "dockson", "breeze", "ham", "clubs", "spook"
+      ]);
+      const bridgeFour = new Set([
+        "kaladin", "teft", "lopin", "rock", "sigzil", "rlain", "dabbid"
+      ]);
+
+      if (shardIds.has(id)) return 0;
+      if (vesselAndWorldIds.has(id)) return 1;
+      if (c.type === "spren" || c.type === "crossover" || c.series === "cosmere") return 2;
+      if (originalCrew.has(id) || bridgeFour.has(id)) return 4;
+      if (c.type === "main") return 3;
+      return 4;
+    };
+
     const nodes = new vis.DataSet(validCharacters.map(c => ({
       id: c.id,
+      level: hierarchyLevel(c),
       label: c.name,
       title: `${c.name}\n${c.role}`,
       group: c.type === "spren" ? "spren" : c.series,
@@ -1329,6 +1356,20 @@
 
     const options = {
       autoResize: true,
+      layout: {
+        hierarchical: {
+          enabled: true,
+          direction: "UD",
+          sortMethod: "directed",
+          levelSeparation: 185,
+          nodeSpacing: 190,
+          treeSpacing: 270,
+          blockShifting: true,
+          edgeMinimization: true,
+          parentCentralization: false,
+          shakeTowards: "roots"
+        }
+      },
       interaction: {
         hover: true,
         tooltipDelay: 140,
@@ -1341,16 +1382,17 @@
       },
       physics: {
         enabled: true,
-        stabilization: { enabled: true, iterations: 180, updateInterval: 25 },
-        barnesHut: {
-          gravitationalConstant: -2600,
-          centralGravity: 0.18,
+        solver: "hierarchicalRepulsion",
+        stabilization: { enabled: true, iterations: 220, updateInterval: 25 },
+        hierarchicalRepulsion: {
+          centralGravity: 0.0,
           springLength: 145,
-          springConstant: 0.025,
-          damping: 0.42,
-          avoidOverlap: 0.35
+          springConstant: 0.01,
+          nodeDistance: 170,
+          damping: 0.09,
+          avoidOverlap: 1
         },
-        minVelocity: 0.8,
+        minVelocity: 0.75,
         timestep: 0.45,
         adaptiveTimestep: true
       },
